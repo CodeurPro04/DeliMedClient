@@ -9,7 +9,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Cette application nécessite l'accès à votre caméra pour scanner les codes-barres des médicaments."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +22,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "CAMERA"
+      ]
     },
     "web": {
       "output": "static",
@@ -37,6 +43,12 @@
           "dark": {
             "backgroundColor": "#000000"
           }
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Autoriser $(PRODUCT_NAME) à accéder à votre caméra pour scanner les codes-barres des médicaments."
         }
       ]
     ],
