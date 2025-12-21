@@ -12,6 +12,30 @@ export const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
+  locationContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 12,
+    gap: 8,
+  },
+  locationTextContainer: {
+    flex: 1,
+  },
+  locationLabel: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 11,
+    fontWeight: "500",
+    marginBottom: 2,
+  },
+  locationText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "700",
+  },
   actionBanner: {
     backgroundColor: "#E91E63",
     borderRadius: 12,
@@ -26,35 +50,40 @@ export const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#EEF2F6",
   },
   navContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    paddingVertical: 20,
-    paddingHorizontal: 16,
-    backgroundColor: "white",
+    justifyContent: "space-evenly",
+    paddingVertical: 32,
+    paddingHorizontal: 30,
+    backgroundColor: "#EEF2F6",
   },
   navItem: {
     alignItems: "center",
+    width: 95,
   },
   navIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 70,
+    height: 70,
+    borderRadius: 45,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: 12,
+    shadowColor: "#5EC8F2",
+    shadowOffset: { 
+      width: 0, 
+      height: 10 
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 20,
+    elevation: 10,
   },
   navLabel: {
-    fontSize: 12,
-    color: "#333",
-    fontWeight: "500",
+    fontSize: 14,
+    color: "#1F2937",
+    fontWeight: "600",
+    textAlign: "center",
   },
   carouselContainer: {
     marginTop: 16,
@@ -145,6 +174,6 @@ export const styles = StyleSheet.create({
   seeMoreContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4, // espace entre texte et icône
+    gap: 4,
   }
 });

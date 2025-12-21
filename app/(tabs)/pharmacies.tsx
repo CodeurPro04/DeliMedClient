@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { PharmacyCard } from "@/components/pharmacy/PharmacyCard";
 
@@ -37,7 +38,8 @@ export default function PharmaciesScreen() {
     console.log("Code-barres scanné:", barcode);
     setSearchQuery(barcode);
   };
-  // Données de test avec pharmacies de Côte d’Ivoire
+
+  // Données de test avec pharmacies de Côte d'Ivoire
   const pharmacies: Pharmacy[] = [
     {
       id: "1",
@@ -77,7 +79,7 @@ export default function PharmaciesScreen() {
     },
     {
       id: "4",
-      name: "Pharmacie d’Angré Château",
+      name: "Pharmacie d'Angré Château",
       address: "Angré 8e Tranche, Cocody, Abidjan",
       city: "Cocody",
       distance: "3.1 km",
@@ -278,8 +280,24 @@ export default function PharmaciesScreen() {
           </>
         )}
 
-        <View style={{ height: 32 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* Bouton flottant "Carte" - Simple et élégant */}
+      <TouchableOpacity
+        style={styles.mapFloatingButton}
+        activeOpacity={0.8}
+        onPress={() => router.push("/map")}
+      >
+        <LinearGradient
+          colors={["#E91E63", "#C2185B"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.mapButtonGradient}
+        >
+          <Ionicons name="map" size={28} color="white" />
+        </LinearGradient>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -407,5 +425,41 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 15,
     fontWeight: "600",
+  },
+  // Styles du bouton flottant carte - Version simple et élégante
+  mapFloatingButton: {
+    position: "absolute",
+    bottom: 24,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { 
+      width: 0, 
+      height: 4 
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  mapButtonGradient: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  mapButtonContent: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  mapIconContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  mapButtonText: {
+    display: "none",
   },
 });

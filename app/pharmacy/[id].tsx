@@ -364,7 +364,7 @@ export default function PharmacyDetailsScreen() {
           <Text style={styles.sectionDescription}>
             Ajoutez votre ordonnance au format PDF ou photo. Le pharmacien va
             préparer votre commande. Vous n'avez pas besoin de sélectionner le
-            contenu de votre ordonnance depuis le catalogue des produits. 
+            contenu de votre ordonnance depuis le catalogue des produits.
           </Text>
 
           <TouchableOpacity
@@ -451,7 +451,15 @@ export default function PharmacyDetailsScreen() {
                 {popularProducts.length} produits disponibles
               </Text>
             </View>
-            <TouchableOpacity style={styles.viewAllButton}>
+            <TouchableOpacity
+              style={styles.viewAllButton}
+              onPress={() =>
+                router.push({
+                  pathname: "/all-products",
+                  params: { pharmacyId: pharmacy.id },
+                })
+              }
+            >
               <Text style={styles.viewAllText}>Tout voir</Text>
               <Ionicons name="arrow-forward" size={16} color="#00A8E8" />
             </TouchableOpacity>
@@ -983,7 +991,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E0E0E0",
   },
-
   productCardSelected: {
     borderColor: "#00A8E8",
     shadowColor: "#00A8E8",

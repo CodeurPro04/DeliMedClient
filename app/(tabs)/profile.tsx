@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function ProfileScreen() {
       title: 'Services',
       items: [
         { icon: 'heart-outline', title: 'Pharmacies favorites', color: '#E91E63', badge: '3' },
-        { icon: 'people-outline', title: 'Parrainage', color: '#795548', subtitle: 'Parrainez, gagnez €10' },
+        { icon: 'people-outline', title: 'Parrainage', color: '#795548', subtitle: 'Parrainez, gagnez 1000 FCFA' },
         { icon: 'gift-outline', title: 'Mes avantages', color: '#FF4081' },
       ]
     }
