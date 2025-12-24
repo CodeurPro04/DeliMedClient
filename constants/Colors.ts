@@ -1,8 +1,8 @@
 export const Colors = {
-  primary: '#00A6FF',      // Bleu principal
-  secondary: '#FF1493',    // Rose/Magenta
-  success: '#00D4AA',      // Vert pour "Ouverte"
-  warning: '#FFB800',      // Orange
+  primary: '#00A6FF',
+  secondary: '#FF1493',
+  success: '#00D4AA',
+  warning: '#FFB800',
   danger: '#FF3B30',
   
   background: '#F8F9FA',

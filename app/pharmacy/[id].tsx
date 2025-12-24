@@ -90,7 +90,7 @@ export default function PharmacyDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [pharmacy, setPharmacy] = useState<any>(null);
 
-  // Récupérer l'ID depuis l'URL
+  // Récupere l'ID depuis l'URL
   const pharmacyId = Array.isArray(params.id) ? params.id[0] : params.id;
 
   // Simuler le chargement des données
@@ -289,7 +289,7 @@ export default function PharmacyDetailsScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#00A8E8" />
 
-      {/* Header avec retour et actions */}
+      {/* Header*/}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -484,7 +484,7 @@ export default function PharmacyDetailsScreen() {
                 onPress={() => handleSelectProduct(product.id)}
                 activeOpacity={0.9}
               >
-                {/* Image avec overlay et checkbox */}
+                {/* Image*/}
                 <View style={styles.productImageContainer}>
                   <Image
                     source={{ uri: product.image }}
@@ -492,10 +492,10 @@ export default function PharmacyDetailsScreen() {
                     resizeMode="cover"
                   />
 
-                  {/* Overlay dégradé élégant */}
+                  {/* Overlay*/}
                   <View style={styles.imageOverlayGradient} />
 
-                  {/* Badge de stock modernisé */}
+                  {/* Badge de stock*/}
                   <View
                     style={[
                       styles.stockBadge,
@@ -515,7 +515,7 @@ export default function PharmacyDetailsScreen() {
                     <Text style={styles.stockText}>{product.stock}</Text>
                   </View>
 
-                  {/* Checkbox flottante avec animation */}
+                  {/* Checkbox*/}
                   <View style={styles.checkboxContainer}>
                     <View
                       style={[
@@ -541,7 +541,7 @@ export default function PharmacyDetailsScreen() {
                   </View>
                 </View>
 
-                {/* Informations du produit avec meilleure hiérarchie */}
+                {/* Informations du produit */}
                 <View style={styles.productInfo}>
                   <View style={styles.categoryBadge}>
                     <Text style={styles.categoryText}>{product.category}</Text>
@@ -581,7 +581,7 @@ export default function PharmacyDetailsScreen() {
                   </View>
                 </View>
 
-                {/* Effet de sélection brillant */}
+                {/* Effet de sélection*/}
                 {selectedProducts.includes(product.id) && (
                   <View style={styles.selectionGlow} />
                 )}
@@ -593,7 +593,7 @@ export default function PharmacyDetailsScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* Bouton flottant Commander */}
+      {/* Bouton Commander */}
       {selectedProducts.length > 0 && (
         <View style={styles.floatingButtonContainer}>
           <TouchableOpacity

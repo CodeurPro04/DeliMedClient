@@ -58,7 +58,7 @@ export default function AllProductsScreen() {
     { id: "secours", name: "Premiers secours", icon: "bandage-outline" },
   ];
 
-  // Liste complète des médicaments (étendue)
+  // Liste complète des médicaments
   const allProducts = [
     {
       id: "1",
@@ -429,7 +429,7 @@ export default function AllProductsScreen() {
                 onPress={() => handleSelectProduct(product.id)}
                 activeOpacity={0.9}
               >
-                {/* Image avec overlay */}
+                {/* Image */}
                 <View style={styles.productImageContainer}>
                   <Image
                     source={{ uri: product.image }}
@@ -541,7 +541,7 @@ export default function AllProductsScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* Bouton flottant Commander */}
+      {/* Bouton Commander */}
       {selectedProducts.length > 0 && (
         <View style={styles.floatingButtonContainer}>
           <TouchableOpacity
@@ -567,7 +567,7 @@ export default function AllProductsScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            {/* Header du modal */}
+            {/* Header */}
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Filtres et tri</Text>
               <TouchableOpacity

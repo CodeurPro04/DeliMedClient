@@ -4,7 +4,6 @@ import { View, Text, StyleSheet } from "react-native";
 import { COLORS } from "@/constants/Colors";
 
 export default function TabLayout() {
-  // 🔴 Mock — à remplacer plus tard par un store global
   const cartCount = 3;
 
   return (

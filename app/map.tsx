@@ -145,7 +145,7 @@ export default function MapScreen() {
     },
   ];
 
-  // Filtrer les pharmacies selon le type de filtre
+  // Filtrer les pharmacies
   const filteredPharmacies = pharmacies.filter((pharmacy) => {
     switch (filterType) {
       case "open":
@@ -244,7 +244,6 @@ export default function MapScreen() {
     setFilterType(newFilter);
     setActiveCardIndex(0);
     
-    // Repositionner la carte pour voir toutes les pharmacies filtrées
     if (filteredPharmacies.length > 0) {
       setTimeout(() => {
         showAllPharmacies();
@@ -364,7 +363,7 @@ export default function MapScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Bottom Sheet avec filtres et liste */}
+      {/* Bottom Sheet */}
       <View style={styles.bottomSheet}>
         {/* Barre de drag */}
         <View style={styles.dragHandle} />

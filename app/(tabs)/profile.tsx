@@ -8,7 +8,7 @@ export default function ProfileScreen() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
 
-  // Données des commandes récentes
+  // Données de test
   const recentOrders = [
     {
       id: 'ORD-001',
@@ -77,7 +77,7 @@ export default function ProfileScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#00A8E8" />
       
-      {/* Header avec style cohérent */}
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.titleContainer}>
@@ -106,7 +106,7 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Statistiques en haut */}
+        {/* Statistiques */}
         <View style={styles.statsCard}>
           <View style={styles.statsRow}>
             <View style={styles.statItem}>

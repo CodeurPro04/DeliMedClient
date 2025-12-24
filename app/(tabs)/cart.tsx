@@ -12,7 +12,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Colors } from "../../constants/Colors";
 
-/* 📦 Catalogue produits (mock) avec images */
 const productsCatalog = [
   {
     id: "1",
@@ -77,7 +76,6 @@ export default function CartScreen() {
     );
   };
 
-  /* 🛒 Panier vide */
   if (cartItems.length === 0) {
     return (
       <View style={styles.emptyState}>
@@ -86,13 +84,6 @@ export default function CartScreen() {
         <Text style={styles.emptyText}>
           Ajoutez des produits depuis une pharmacie
         </Text>
-        {/* Bouton Retour aux pharmacies 
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.backButtonText}>Retour</Text>
-        </TouchableOpacity> */}
       </View>
     );
   }
@@ -154,7 +145,6 @@ export default function CartScreen() {
   );
 }
 
-/* 🎨 Styles UX améliorés */
 const styles = StyleSheet.create({
   container: {
     flex: 1,

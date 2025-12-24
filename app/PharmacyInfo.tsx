@@ -16,7 +16,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
-// Données simulées pour différentes pharmacies
+// Données simulées 
 const pharmaciesData = {
   '1': {
     id: '1',
@@ -167,7 +167,7 @@ export default function PharmacyInfoScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#00A8E8" />
       
-      {/* Header avec retour et actions */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton} 
@@ -195,7 +195,7 @@ export default function PharmacyInfoScreen() {
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
-        {/* Image de la pharmacie */}
+        {/* Image */}
         <View style={styles.imageContainer}>
           <Image
             source={{ uri: pharmacy.image }}
@@ -347,7 +347,7 @@ export default function PharmacyInfoScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* Bouton flottant Commander */}
+      {/* Bouton Commander */}
       {selectedProducts.length > 0 && (
         <View style={styles.floatingButtonContainer}>
           <TouchableOpacity 

@@ -39,7 +39,7 @@ export default function PharmaciesScreen() {
     setSearchQuery(barcode);
   };
 
-  // Données de test avec pharmacies de Côte d'Ivoire
+  // Données de test
   const pharmacies: Pharmacy[] = [
     {
       id: "1",
@@ -133,7 +133,7 @@ export default function PharmaciesScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#00A8E8" />
 
-      {/* Header avec gradient visuel */}
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.titleContainer}>
@@ -283,7 +283,7 @@ export default function PharmaciesScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      {/* Bouton flottant "Carte" - Simple et élégant */}
+      {/* Bouton */}
       <TouchableOpacity
         style={styles.mapFloatingButton}
         activeOpacity={0.8}
@@ -426,7 +426,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
-  // Styles du bouton flottant carte - Version simple et élégante
   mapFloatingButton: {
     position: "absolute",
     bottom: 24,

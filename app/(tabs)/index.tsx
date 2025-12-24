@@ -60,10 +60,9 @@ export default function HomeScreen() {
   const bannerScrollRef = useRef<ScrollView>(null);
   const router = useRouter();
 
-  // Animation scale pour l'effet de press
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  // Récupérer la localisation de l'utilisateur
+  // Récupere la localisation de l'utilisateur
   useEffect(() => {
     getUserLocation();
   }, []);
@@ -159,7 +158,6 @@ export default function HomeScreen() {
       }),
     ]).start();
 
-    // Délai pour laisser l'animation se terminer avant la navigation
     setTimeout(() => {
       router.push("/pharmacies");
     }, 150);
@@ -208,7 +206,7 @@ export default function HomeScreen() {
     },
   ];
 
-  // Données de test avec pharmacies ivoiriennes
+  // Données de test
   const pharmacies: Pharmacy[] = [
     {
       id: "1",
@@ -347,9 +345,8 @@ export default function HomeScreen() {
           />
         }
       >
-        {/* Navigation Icons - 3 éléments avec belle disposition */}
         <View style={styles.navContainer}>
-          {/* Pharmacies - Bleu clair en haut, rose/violet en bas */}
+          {/* Pharmacies */}
           <TouchableOpacity style={styles.navItem} onPress={() => router.push("/pharmacies")}>
             <LinearGradient
               colors={["#5DC8F3", "#E8A0D8"]}
@@ -362,7 +359,7 @@ export default function HomeScreen() {
             <Text style={styles.navLabel}>Pharmacies</Text>
           </TouchableOpacity>
 
-          {/* Carte - Bleu en haut, rose en bas */}
+          {/* Carte */}
           <TouchableOpacity
             style={styles.navItem}
             onPress={() => router.push("/map")}
@@ -378,7 +375,7 @@ export default function HomeScreen() {
             <Text style={styles.navLabel}>Carte</Text>
           </TouchableOpacity>
 
-          {/* Service - Violet en haut, rose en bas */}
+          {/* Service */}
           <TouchableOpacity style={styles.navItem}>
             <LinearGradient
               colors={["#9D8FE8", "#E8A0D8"]}

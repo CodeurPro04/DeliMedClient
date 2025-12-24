@@ -23,7 +23,7 @@ export const PharmacyCard = ({ pharmacy, onPress }: PharmacyCardProps) => (
     activeOpacity={0.9}
     onPress={onPress}
   >
-    {/* Image grande en haut */}
+    {/* Image */}
     <View style={cardStyles.imageContainer}>
       {pharmacy.image ? (
         <Image
