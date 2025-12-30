@@ -39,7 +39,7 @@ export default function OrdersScreen() {
       pharmacy: "Pharmacie Moderne",
       deliveryAddress: "Cocody, Riviera",
       itemCount: 2,
-      estimatedDelivery: "Aujourd'hui, 16h-18h",
+      estimatedDelivery: "Aujourd'hui, 12h-13h",
     },
     {
       id: "ORD-003",

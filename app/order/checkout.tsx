@@ -358,7 +358,7 @@ export default function CheckoutScreen() {
             </View>
             <View style={styles.cardRow}>
               <View style={[styles.cardInput, { flex: 1, marginRight: 8 }]}>
-                <Text style={styles.cardLabel}>Date d'expiration</Text>
+                <Text style={styles.cardLabel}>Date d&apos;expiration</Text>
                 <TextInput
                   style={styles.cardInputField}
                   placeholder="MM/AA"
@@ -481,7 +481,7 @@ export default function CheckoutScreen() {
             <View style={styles.infoBox}>
               <Ionicons name="information-circle" size={20} color="#00A8E8" />
               <Text style={styles.infoText}>
-                Votre livreur utilisera cette adresse pour la livraison. Assurez-vous qu'elle est exacte.
+                Votre livreur utilisera cette adresse pour la livraison. Assurez-vous qu&apos;elle est exacte.
               </Text>
             </View>
           </View>
@@ -615,7 +615,7 @@ export default function CheckoutScreen() {
               </View>
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Frais de livraison</Text>
-                <Text style={styles.summaryValue}>Gratuit</Text>
+                <Text style={styles.summaryValue}>0</Text>
               </View>
               <View style={styles.summaryDivider} />
               <View style={styles.totalRow}>
@@ -627,8 +627,8 @@ export default function CheckoutScreen() {
             {/* Conditions */}
             <View style={styles.conditions}>
               <Text style={styles.conditionsText}>
-                En confirmant votre commande, vous acceptez nos conditions générales d'utilisation.
-                Vous pourrez suivre l'avancement de votre commande dans l'espace "Mes commandes".
+                En confirmant votre commande, vous acceptez nos conditions générales d&apos;utilisation.
+                Vous pourrez suivre l&apos;avancement de votre commande dans l&apos;espace Mes commandes.
               </Text>
             </View>
           </View>
@@ -648,7 +648,7 @@ export default function CheckoutScreen() {
         
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.successHeader}>
-            <Text style={styles.successTitle}>Commande confirmée !</Text>
+            <Text style={styles.successTitle}>Commande effectuée !</Text>
           </View>
         </SafeAreaView>
 
@@ -658,9 +658,9 @@ export default function CheckoutScreen() {
             <View style={styles.successRing} />
           </Animated.View>
           
-          <Text style={styles.successMessage}>Votre commande a été confirmée avec succès</Text>
+          <Text style={styles.successMessage}>Votre commande a été effectuée avec succès</Text>
           <Text style={styles.successSubtitle}>
-            Vous pouvez suivre l'avancement de votre commande dans votre espace "Mes commandes"
+            Vous pouvez suivre l&apos;avancement de votre commande dans votre espace Mes commandes.
           </Text>
           
           <View style={styles.successInfo}>

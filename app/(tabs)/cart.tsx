@@ -83,45 +83,6 @@ const productsCatalog = [
   },
   {
     id: "6",
-    name: "Sirop pour la toux",
-    price: 4800,
-    image:
-      "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&q=80",
-    category: "ORL",
-    description: "Flacon 125ml",
-    requiresPrescription: true,
-    pharmacyStock: 6,
-    categoryId: "orl",
-    stock: "En stock",
-  },
-  {
-    id: "7",
-    name: "Collyre yeux secs",
-    price: 7500,
-    image:
-      "https://images.unsplash.com/photo-1585435421671-0c16764179c0?w=400&q=80",
-    category: "Ophtalmologie",
-    description: "Flacon 10ml",
-    requiresPrescription: false,
-    pharmacyStock: 18,
-    categoryId: "orl",
-    stock: "En stock",
-  },
-  {
-    id: "8",
-    name: "Thermomètre digital",
-    price: 12000,
-    image:
-      "https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=400&q=80",
-    category: "Matériel médical",
-    description: "Thermomètre frontal infrarouge",
-    requiresPrescription: false,
-    pharmacyStock: 5,
-    categoryId: "secours",
-    stock: "En stock",
-  },
-  {
-    id: "9",
     name: "Crème hydratante Nivea",
     price: 2500,
     image:
@@ -134,7 +95,7 @@ const productsCatalog = [
     stock: "En stock",
   },
   {
-    id: "10",
+    id: "7",
     name: "Spray nasal",
     price: 5800,
     image:
@@ -147,7 +108,7 @@ const productsCatalog = [
     stock: "En stock",
   },
   {
-    id: "11",
+    id: "8",
     name: "Compresses stériles",
     price: 2500,
     image:
@@ -160,7 +121,33 @@ const productsCatalog = [
     stock: "En stock",
   },
   {
-    id: "12",
+    id: "9",
+    name: "Thermomètre digital",
+    price: 12000,
+    image:
+      "https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=400&q=80",
+    category: "Matériel médical",
+    description: "Thermomètre frontal infrarouge",
+    requiresPrescription: false,
+    pharmacyStock: 5,
+    categoryId: "secours",
+    stock: "En stock",
+  },
+  {
+    id: "10",
+    name: "Collyre yeux secs",
+    price: 7500,
+    image:
+      "https://images.unsplash.com/photo-1585435421671-0c16764179c0?w=400&q=80",
+    category: "Ophtalmologie",
+    description: "Flacon 10ml",
+    requiresPrescription: false,
+    pharmacyStock: 18,
+    categoryId: "orl",
+    stock: "En stock",
+  },
+  {
+    id: "11",
     name: "Pansements assortis",
     price: 2500,
     image:
@@ -173,7 +160,7 @@ const productsCatalog = [
     stock: "En stock",
   },
   {
-    id: "13",
+    id: "12",
     name: "Spray gorge irritée",
     price: 6200,
     image:
@@ -186,7 +173,7 @@ const productsCatalog = [
     stock: "Stock limité",
   },
   {
-    id: "14",
+    id: "13",
     name: "Ibuprofène 400mg",
     price: 3500,
     image:
@@ -199,7 +186,7 @@ const productsCatalog = [
     stock: "En stock",
   },
   {
-    id: "15",
+    id: "14",
     name: "Sérum physiologique",
     price: 1500,
     image:
@@ -211,8 +198,8 @@ const productsCatalog = [
     categoryId: "hygiene",
     stock: "En stock",
   },
-  {
-    id: "16",
+   {
+    id: "15",
     name: "Crème cicatrisante",
     price: 4200,
     image:
@@ -225,7 +212,7 @@ const productsCatalog = [
     stock: "En stock",
   },
   {
-    id: "17",
+    id: "16",
     name: "Vitamine D3",
     price: 3800,
     image:
@@ -236,9 +223,9 @@ const productsCatalog = [
     pharmacyStock: 18,
     categoryId: "immunite",
     stock: "En stock",
-  },
+  }, 
 ];
-
+ 
 // Informations de la pharmacie
 const pharmaciesData = {
   "1": {

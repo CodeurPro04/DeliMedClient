@@ -38,8 +38,7 @@ export default function OrderSuccessScreen() {
   const ringScale = useRef(new Animated.Value(0)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
 
-  // Compte à rebours
-  const [countdown, setCountdown] = useState(8);
+  // const [countdown, setCountdown] = useState(8);
 
   // Lancer les animations au chargement
   useEffect(() => {
@@ -90,12 +89,12 @@ export default function OrderSuccessScreen() {
       }
     }, 600);
 
-    // Compte à rebours pour redirection
+    // compte à rebours
+    /*
     const countdownTimer = setInterval(() => {
       setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(countdownTimer);
-          // Utiliser setTimeout pour éviter de mettre à jour pendant le rendu
           setTimeout(() => {
             router.replace("/profile");
           }, 0);
@@ -104,16 +103,17 @@ export default function OrderSuccessScreen() {
         return prev - 1;
       });
     }, 1000);
+    */
 
     return () => {
       clearTimeout(confettiTimer);
-      clearInterval(countdownTimer);
+      // clearInterval(countdownTimer);
     };
   }, []);
 
   const handleViewOrder = () => {
     router.push({
-      pathname: "/profile",
+      pathname: "/order/orders",
       params: { id: orderId },
     });
   };
@@ -124,7 +124,7 @@ export default function OrderSuccessScreen() {
 
   const handleTrackOrder = () => {
     router.push({
-      pathname: "/profile",
+      pathname: "/order/[id]",
       params: { orderId },
     });
   };
@@ -145,7 +145,7 @@ export default function OrderSuccessScreen() {
           >
             <Ionicons name="close" size={24} color="white" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Commande confirmée</Text>
+          <Text style={styles.headerTitle}>Commande effectuée</Text>
           <View style={styles.headerPlaceholder} />
         </View>
       </SafeAreaView>
@@ -265,7 +265,7 @@ export default function OrderSuccessScreen() {
             },
           ]}
         >
-          <Text style={styles.successTitle}>Commande confirmée !</Text>
+          <Text style={styles.successTitle}>Commande effectuée !</Text>
           <Text style={styles.successSubtitle}>
             Votre commande a été passée avec succès
           </Text>
@@ -332,7 +332,7 @@ export default function OrderSuccessScreen() {
                 <Text style={styles.progressLabel}>Commandé</Text>
                 <Text style={styles.progressLabel}>En préparation</Text>
                 <Text style={styles.progressLabel}>En livraison</Text>
-                <Text style={styles.progressLabel}>Livré</Text>
+                <Text style={styles.progressLabel}>Livrée</Text>
               </View>
               <View style={styles.progressDots}>
                 {[0, 1, 2, 3].map((dot) => (
@@ -359,8 +359,8 @@ export default function OrderSuccessScreen() {
             <View style={styles.messageContent}>
               <Text style={styles.messageTitle}>Suivez votre commande</Text>
               <Text style={styles.messageText}>
-                Vous pouvez suivre l'avancement en temps réel de votre commande 
-                dans votre espace "Mes commandes". Une notification vous sera 
+                Vous pouvez suivre l&apos;avancement en temps réel de votre commande 
+                dans votre espace Mes commandes. Une notification vous sera 
                 envoyée à chaque étape importante.
               </Text>
             </View>
@@ -370,7 +370,7 @@ export default function OrderSuccessScreen() {
           <View style={styles.assistanceCard}>
             <Ionicons name="headset-outline" size={24} color="#00A8E8" />
             <View style={styles.assistanceContent}>
-              <Text style={styles.assistanceTitle}>Besoin d'aide ?</Text>
+              <Text style={styles.assistanceTitle}>Besoin d&apos;aide ?</Text>
               <Text style={styles.assistanceText}>
                 Notre service client est disponible 7j/7 au
               </Text>
@@ -410,7 +410,8 @@ export default function OrderSuccessScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Compte à rebours pour redirection */}
+        {/* Compte a rebourd */}
+        {/*
         <View style={styles.countdownContainer}>
           <Text style={styles.countdownText}>
             Redirection automatique vers vos commandes dans 
@@ -421,6 +422,7 @@ export default function OrderSuccessScreen() {
             </Animated.Text>
           </View>
         </View>
+        */}
       </Animated.View>
     </View>
   );
@@ -759,6 +761,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#00A8E8",
   },
+  /*
   countdownContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -783,4 +786,5 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "white",
   },
+  */
 });

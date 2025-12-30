@@ -101,6 +101,18 @@ export default function PharmaciesScreen() {
       image:
         "https://images.unsplash.com/photo-1585435421671-0c16764179c0?w=800&q=80",
     },
+    {
+      id: "6",
+      name: "Pharmacie de Marcory Zone 4",
+      address: "Zone 4C, Marcory, Abidjan",
+      city: "Marcory",
+      distance: "5.4 km",
+      closingTime: "22:30",
+      isOpen: true,
+      deliveryTime: "15-30 min",
+      image:
+        "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80",
+    },
   ];
 
   // Filtrage intelligent avec useMemo pour optimisation

@@ -324,10 +324,10 @@ export default function MapScreen() {
   };
 
   const handleViewDetails = (pharmacy: Pharmacy) => {
-    // Navigation vers la page des détails de la pharmacie
+    // Navigue vers la page des détails de la pharmacie
     router.push({
       pathname: "/pharmacy/[id]",
-      params: { 
+      params: {
         id: pharmacy.id,
         name: pharmacy.name,
         address: pharmacy.address,
@@ -340,8 +340,8 @@ export default function MapScreen() {
         rating: pharmacy.rating,
         isGuard: pharmacy.isGuard,
         latitude: pharmacy.latitude,
-        longitude: pharmacy.longitude
-      }
+        longitude: pharmacy.longitude,
+      },
     });
   };
 
@@ -448,6 +448,7 @@ export default function MapScreen() {
         <View style={styles.bottomSheetHeader}>
           <View style={styles.titleRow}>
             <Text style={styles.bottomSheetTitle}>Pharmacies disponibles</Text>
+            {/* Bouton d'expansion/réduction 
             <TouchableOpacity
               onPress={() =>
                 isExpanded ? collapseBottomSheet() : expandBottomSheet()
@@ -459,7 +460,7 @@ export default function MapScreen() {
                 size={24}
                 color="#00A8E8"
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
 
           <ScrollView
@@ -638,13 +639,15 @@ export default function MapScreen() {
                     </View>
                   </View>
 
-                  {/* Bouton Voir les détails */}
+                  {/* Bouton détails */}
                   <TouchableOpacity
                     style={styles.detailsButton}
                     onPress={() => handleViewDetails(pharmacy)}
                     activeOpacity={0.8}
                   >
-                    <Text style={styles.detailsButtonText}>Voir les détails</Text>
+                    <Text style={styles.detailsButtonText}>
+                      Voir les détails
+                    </Text>
                     <Ionicons name="arrow-forward" size={14} color="#00A8E8" />
                   </TouchableOpacity>
                 </View>
@@ -972,7 +975,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#00A8E8",
   },
-  // Styles pour le bouton Voir les détails
   detailsButton: {
     flexDirection: "row",
     alignItems: "center",
