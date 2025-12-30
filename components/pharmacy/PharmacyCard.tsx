@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 interface Pharmacy {
   id: string;
@@ -14,94 +15,89 @@ interface Pharmacy {
 
 interface PharmacyCardProps {
   pharmacy: Pharmacy;
-  onPress?: () => void;
 }
 
-export const PharmacyCard = ({ pharmacy, onPress }: PharmacyCardProps) => (
-  <TouchableOpacity
-    style={cardStyles.card}
-    activeOpacity={0.9}
-    onPress={onPress}
-  >
-    {/* Image */}
-    <View style={cardStyles.imageContainer}>
-      {pharmacy.image ? (
-        <Image
-          source={{ uri: pharmacy.image }}
-          style={cardStyles.image}
-          resizeMode="cover"
-        />
-      ) : (
-        <View style={cardStyles.imagePlaceholder}>
-          <Ionicons name="business" size={48} color="#00A8E8" />
-        </View>
-      )}
+export const PharmacyCard = ({ pharmacy }: PharmacyCardProps) => {
+  const router = useRouter();
 
-      {/* Badge statut sur l'image */}
-      <View
-        style={[
-          cardStyles.statusBadgeOnImage,
-          pharmacy.isOpen ? cardStyles.openBadge : cardStyles.closedBadge,
-        ]}
-      >
-        <Text style={cardStyles.statusText}>
-          {pharmacy.isOpen ? "Ouverte" : "Fermée"}
-        </Text>
-      </View>
-    </View>
+  return (
+    <TouchableOpacity
+      style={cardStyles.card}
+      activeOpacity={0.9}
+      onPress={() => router.push(`/pharmacy/${pharmacy.id}`)}
+    >
+      {/* Image */}
+      <View style={cardStyles.imageContainer}>
+        {pharmacy.image ? (
+          <Image
+            source={{ uri: pharmacy.image }}
+            style={cardStyles.image}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={cardStyles.imagePlaceholder}>
+            <Ionicons name="business" size={48} color="#00A8E8" />
+          </View>
+        )}
 
-    {/* Informations */}
-    <View style={cardStyles.info}>
-      <Text style={cardStyles.name} numberOfLines={1}>
-        {pharmacy.name}
-      </Text>
-
-      <Text style={cardStyles.address} numberOfLines={2}>
-        {pharmacy.address}
-      </Text>
-
-      {/* Détails en ligne */}
-      <View style={cardStyles.detailsRow}>
-        <View style={cardStyles.detailItem}>
-          <Ionicons name="location" size={16} color="#00A8E8" />
-          <Text style={cardStyles.detailText}>{pharmacy.distance}</Text>
-        </View>
-
-        <View style={cardStyles.detailItem}>
-          <Ionicons name="time-outline" size={16} color="#666" />
-          <Text style={cardStyles.detailText}>
-            {pharmacy.isOpen ? `Ferme à ${pharmacy.closingTime}` : "Fermée"}
+        {/* Badge statut */}
+        <View
+          style={[
+            cardStyles.statusBadgeOnImage,
+            pharmacy.isOpen ? cardStyles.openBadge : cardStyles.closedBadge,
+          ]}
+        >
+          <Text style={cardStyles.statusText}>
+            {pharmacy.isOpen ? "Ouverte" : "Fermée"}
           </Text>
         </View>
-
-        <View style={cardStyles.detailItem}>
-          <Ionicons name="bicycle-outline" size={16} color="#4CAF50" />
-          <Text style={cardStyles.detailText}>{pharmacy.deliveryTime}</Text>
-        </View>
       </View>
 
-      {/* Liens d'action 
-      <View style={cardStyles.actions}>
-        <TouchableOpacity style={cardStyles.linkButton}>
-          <Text style={cardStyles.linkText}>Distance estimée</Text>
-        </TouchableOpacity>
+      {/* Infos */}
+      <View style={cardStyles.info}>
+        <Text style={cardStyles.name} numberOfLines={1}>
+          {pharmacy.name}
+        </Text>
 
-        <TouchableOpacity style={cardStyles.linkButton}>
-          <Text style={cardStyles.linkText}>Voir les horaires</Text>
-        </TouchableOpacity>
+        <Text style={cardStyles.address} numberOfLines={2}>
+          {pharmacy.address}
+        </Text>
 
-        <TouchableOpacity style={cardStyles.linkButton}>
-          <Text style={cardStyles.linkText}>Délai de prise en charge</Text>
-        </TouchableOpacity>
-      </View> */}
+        {/* Détails */}
+        <View style={cardStyles.detailsRow}>
+          <View style={cardStyles.detailItem}>
+            <Ionicons name="location" size={16} color="#00A8E8" />
+            <Text style={cardStyles.detailText}>{pharmacy.distance}</Text>
+          </View>
 
-      {/* Bouton Commander */}
-      <TouchableOpacity style={cardStyles.orderButton}>
-        <Text style={cardStyles.orderButtonText}>Commander</Text>
-      </TouchableOpacity>
-    </View>
-  </TouchableOpacity>
-);
+          <View style={cardStyles.detailItem}>
+            <Ionicons name="time-outline" size={16} color="#666" />
+            <Text style={cardStyles.detailText}>
+              {pharmacy.isOpen
+                ? `Ferme à ${pharmacy.closingTime}`
+                : "Fermée"}
+            </Text>
+          </View>
+
+          <View style={cardStyles.detailItem}>
+            <Ionicons name="bicycle-outline" size={16} color="#4CAF50" />
+            <Text style={cardStyles.detailText}>
+              {pharmacy.deliveryTime}
+            </Text>
+          </View>
+        </View>
+
+        {/* Bouton Commander */}
+        <TouchableOpacity
+          style={cardStyles.orderButton}
+          onPress={() => router.push(`/pharmacy/${pharmacy.id}`)}
+        >
+          <Text style={cardStyles.orderButtonText}>Commander</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const cardStyles = StyleSheet.create({
   card: {
@@ -169,7 +165,7 @@ const cardStyles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   detailItem: {
     flexDirection: "row",
@@ -179,23 +175,6 @@ const cardStyles = StyleSheet.create({
   detailText: {
     fontSize: 12,
     color: "#666",
-  },
-  actions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
-  },
-  linkButton: {
-    flex: 1,
-    alignItems: "center",
-  },
-  linkText: {
-    fontSize: 11,
-    color: "#00A8E8",
-    textAlign: "center",
   },
   orderButton: {
     backgroundColor: "#E91E63",

@@ -4,7 +4,6 @@ import { View, Text, StyleSheet } from "react-native";
 import { COLORS } from "@/constants/Colors";
 
 export default function TabLayout() {
-  const cartCount = 3;
 
   return (
     <Tabs
@@ -40,14 +39,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <View style={styles.iconContainer}>
               <Ionicons name="cart" size={size} color={color} />
-
-              {cartCount > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>
-                    {cartCount}
-                  </Text>
-                </View>
-              )}
             </View>
           ),
         }}

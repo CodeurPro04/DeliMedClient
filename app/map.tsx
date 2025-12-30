@@ -1,27 +1,29 @@
-import { useState, useRef, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  Dimensions,
-  Modal,
-  Image,
-  ScrollView,
-  Animated,
-  Platform,
-  ActivityIndicator,
-} from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Location from "expo-location";
+import { useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  Image,
+  PanResponder,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE, Region } from "react-native-maps";
 
 const { width, height } = Dimensions.get("window");
-const CARD_WIDTH = width - 32;
+const CARD_WIDTH = (width - 48) / 2;
+const BOTTOM_SHEET_MIN_HEIGHT = height * 0.25;
+const BOTTOM_SHEET_MAX_HEIGHT = height * 0.85;
 
 interface Pharmacy {
   id: string;
@@ -45,129 +47,202 @@ export default function MapScreen() {
   const router = useRouter();
   const mapRef = useRef<MapView>(null);
   const scrollRef = useRef<ScrollView>(null);
-  
-  const [selectedPharmacy, setSelectedPharmacy] = useState<Pharmacy | null>(null);
+  const bottomSheetHeight = useRef(
+    new Animated.Value(BOTTOM_SHEET_MIN_HEIGHT)
+  ).current;
+
   const [userLocation, setUserLocation] = useState<Region | null>(null);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<FilterType>("all");
   const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const pharmacies: Pharmacy[] = [
     {
       id: "1",
       name: "Pharmacie de la Riviera Palmeraie",
       address: "Boulevard Mitterrand, Riviera Palmeraie, Cocody",
-      distance: "2.3 km",
+      distance: "2.3",
       closingTime: "22:00",
       isOpen: true,
       deliveryTime: "10-20 min",
-      image: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=400&q=80",
+      image:
+        "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=400&q=80",
       city: "Cocody",
       rating: "4.8",
       isGuard: false,
       latitude: 5.3599,
-      longitude: -3.9870,
+      longitude: -3.987,
     },
     {
       id: "2",
       name: "Pharmacie du Plateau Indénié",
       address: "Avenue Delafosse, Plateau",
-      distance: "4.8 km",
+      distance: "4.8",
       closingTime: "20:30",
       isOpen: true,
       deliveryTime: "20-30 min",
-      image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&q=80",
+      image:
+        "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&q=80",
       city: "Plateau",
       rating: "4.6",
       isGuard: true,
-      latitude: 5.3270,
-      longitude: -4.0170,
+      latitude: 5.327,
+      longitude: -4.017,
     },
     {
       id: "3",
       name: "Pharmacie de Yopougon Niangon",
       address: "Niangon Sud, Yopougon",
-      distance: "7.6 km",
+      distance: "7.6",
       closingTime: "21:00",
       isOpen: false,
       deliveryTime: "—",
-      image: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80",
+      image:
+        "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80",
       city: "Yopougon",
       rating: "4.3",
       isGuard: false,
-      latitude: 5.3450,
-      longitude: -4.0820,
+      latitude: 5.345,
+      longitude: -4.082,
     },
     {
       id: "4",
       name: "Pharmacie d'Angré Château",
       address: "Angré 8e Tranche, Cocody",
-      distance: "3.1 km",
+      distance: "3.1",
       closingTime: "23:00",
       isOpen: true,
       deliveryTime: "5-15 min",
-      image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&q=80",
+      image:
+        "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&q=80",
       city: "Cocody",
       rating: "4.9",
       isGuard: false,
-      latitude: 5.3750,
-      longitude: -3.9750,
+      latitude: 5.375,
+      longitude: -3.975,
     },
     {
       id: "5",
       name: "Pharmacie du Marché de Treichville",
       address: "Avenue 21, Treichville",
-      distance: "6.9 km",
+      distance: "6.9",
       closingTime: "20:00",
       isOpen: true,
       deliveryTime: "15-25 min",
-      image: "https://images.unsplash.com/photo-1585435421671-0c16764179c0?w=400&q=80",
+      image:
+        "https://images.unsplash.com/photo-1585435421671-0c16764179c0?w=400&q=80",
       city: "Treichville",
       rating: "4.5",
       isGuard: true,
-      latitude: 5.3080,
-      longitude: -4.0050,
+      latitude: 5.308,
+      longitude: -4.005,
     },
     {
       id: "6",
       name: "Pharmacie de Marcory Zone 4",
       address: "Zone 4C, Marcory",
-      distance: "5.4 km",
+      distance: "5.4",
       closingTime: "22:30",
       isOpen: true,
       deliveryTime: "15-30 min",
-      image: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80",
+      image:
+        "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80",
       city: "Marcory",
       rating: "4.7",
       isGuard: false,
-      latitude: 5.2950,
-      longitude: -3.9920,
+      latitude: 5.295,
+      longitude: -3.992,
     },
   ];
 
-  // Filtrer les pharmacies
-  const filteredPharmacies = pharmacies.filter((pharmacy) => {
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return Math.abs(gestureState.dy) > 5;
+      },
+      onPanResponderMove: (_, gestureState) => {
+        const newHeight = isExpanded
+          ? BOTTOM_SHEET_MAX_HEIGHT - gestureState.dy
+          : BOTTOM_SHEET_MIN_HEIGHT - gestureState.dy;
+
+        if (
+          newHeight >= BOTTOM_SHEET_MIN_HEIGHT &&
+          newHeight <= BOTTOM_SHEET_MAX_HEIGHT
+        ) {
+          bottomSheetHeight.setValue(newHeight);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy < -50) {
+          expandBottomSheet();
+        } else if (gestureState.dy > 50) {
+          collapseBottomSheet();
+        } else {
+          Animated.spring(bottomSheetHeight, {
+            toValue: isExpanded
+              ? BOTTOM_SHEET_MAX_HEIGHT
+              : BOTTOM_SHEET_MIN_HEIGHT,
+            useNativeDriver: false,
+          }).start();
+        }
+      },
+    })
+  ).current;
+
+  const expandBottomSheet = () => {
+    setIsExpanded(true);
+    Animated.spring(bottomSheetHeight, {
+      toValue: BOTTOM_SHEET_MAX_HEIGHT,
+      useNativeDriver: false,
+      tension: 50,
+      friction: 8,
+    }).start();
+  };
+
+  const collapseBottomSheet = () => {
+    setIsExpanded(false);
+    Animated.spring(bottomSheetHeight, {
+      toValue: BOTTOM_SHEET_MIN_HEIGHT,
+      useNativeDriver: false,
+      tension: 50,
+      friction: 8,
+    }).start();
+  };
+
+  const getFilteredPharmacies = () => {
     switch (filterType) {
       case "open":
-        return pharmacy.isOpen;
+        return pharmacies.filter((p) => p.isOpen);
       case "guard":
-        return pharmacy.isGuard;
+        return pharmacies.filter((p) => p.isGuard);
       case "nearby":
-        return parseFloat(pharmacy.distance) < 5;
+        return pharmacies.filter((p) => parseFloat(p.distance) < 5);
       default:
-        return true;
+        return pharmacies;
     }
-  });
+  };
+
+  const filteredPharmacies = getFilteredPharmacies();
 
   useEffect(() => {
     getUserLocation();
   }, []);
 
+  useEffect(() => {
+    if (filteredPharmacies.length > 0 && mapRef.current) {
+      setTimeout(() => {
+        showAllPharmacies();
+      }, 300);
+    }
+  }, [filterType]);
+
   const getUserLocation = async () => {
     try {
       setLoading(true);
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
+
       if (status !== "granted") {
         setUserLocation({
           latitude: 5.3364,
@@ -201,54 +276,73 @@ export default function MapScreen() {
   };
 
   const focusOnPharmacy = (pharmacy: Pharmacy, index: number) => {
-    mapRef.current?.animateToRegion({
-      latitude: pharmacy.latitude,
-      longitude: pharmacy.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
-    }, 500);
-    
     setActiveCardIndex(index);
-    scrollRef.current?.scrollTo({
-      x: index * (CARD_WIDTH + 16),
-      animated: true,
-    });
+
+    mapRef.current?.animateToRegion(
+      {
+        latitude: pharmacy.latitude,
+        longitude: pharmacy.longitude,
+        latitudeDelta: 0.02,
+        longitudeDelta: 0.02,
+      },
+      500
+    );
+
+    if (!isExpanded) {
+      collapseBottomSheet();
+    }
   };
 
   const centerOnUser = () => {
-    if (userLocation) {
-      mapRef.current?.animateToRegion({
-        ...userLocation,
-        latitudeDelta: 0.15,
-        longitudeDelta: 0.15,
-      }, 500);
+    if (userLocation && mapRef.current) {
+      mapRef.current.animateToRegion(userLocation, 500);
     }
   };
 
   const showAllPharmacies = () => {
     if (mapRef.current && filteredPharmacies.length > 0) {
-      mapRef.current.fitToCoordinates(
-        filteredPharmacies.map(p => ({
-          latitude: p.latitude,
-          longitude: p.longitude,
-        })),
-        {
-          edgePadding: { top: 120, right: 50, bottom: 300, left: 50 },
-          animated: true,
-        }
-      );
+      const coordinates = filteredPharmacies.map((p) => ({
+        latitude: p.latitude,
+        longitude: p.longitude,
+      }));
+
+      mapRef.current.fitToCoordinates(coordinates, {
+        edgePadding: {
+          top: 150,
+          right: 50,
+          bottom: isExpanded ? 600 : 300,
+          left: 50,
+        },
+        animated: true,
+      });
     }
   };
 
   const handleFilterChange = (newFilter: FilterType) => {
     setFilterType(newFilter);
     setActiveCardIndex(0);
-    
-    if (filteredPharmacies.length > 0) {
-      setTimeout(() => {
-        showAllPharmacies();
-      }, 100);
-    }
+  };
+
+  const handleViewDetails = (pharmacy: Pharmacy) => {
+    // Navigation vers la page des détails de la pharmacie
+    router.push({
+      pathname: "/pharmacy/[id]",
+      params: { 
+        id: pharmacy.id,
+        name: pharmacy.name,
+        address: pharmacy.address,
+        distance: pharmacy.distance,
+        closingTime: pharmacy.closingTime,
+        isOpen: pharmacy.isOpen,
+        deliveryTime: pharmacy.deliveryTime,
+        image: pharmacy.image,
+        city: pharmacy.city,
+        rating: pharmacy.rating,
+        isGuard: pharmacy.isGuard,
+        latitude: pharmacy.latitude,
+        longitude: pharmacy.longitude
+      }
+    });
   };
 
   if (loading) {
@@ -262,9 +356,12 @@ export default function MapScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
-      
-      {/* Carte */}
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="transparent"
+        translucent
+      />
+
       {userLocation && (
         <MapView
           ref={mapRef}
@@ -288,15 +385,15 @@ export default function MapScreen() {
               <View style={styles.markerWrapper}>
                 <LinearGradient
                   colors={
-                    pharmacy.isGuard 
-                      ? ['#FF9800', '#F57C00']
+                    pharmacy.isGuard
+                      ? ["#FF9800", "#F57C00"]
                       : pharmacy.isOpen
-                      ? ['#00A8E8', '#0288D1']
-                      : ['#BDBDBD', '#9E9E9E']
+                      ? ["#00A8E8", "#0288D1"]
+                      : ["#BDBDBD", "#9E9E9E"]
                   }
                   style={[
                     styles.marker,
-                    index === activeCardIndex && styles.markerActive
+                    index === activeCardIndex && styles.markerActive,
                   ]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
@@ -307,16 +404,12 @@ export default function MapScreen() {
                     color="white"
                   />
                 </LinearGradient>
-                {pharmacy.isGuard && (
-                  <View style={styles.guardPulse} />
-                )}
               </View>
             </Marker>
           ))}
         </MapView>
       )}
 
-      {/* Header */}
       <SafeAreaView style={styles.headerSafeArea}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -330,49 +423,45 @@ export default function MapScreen() {
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle}>Carte des pharmacies</Text>
             <Text style={styles.headerSubtitle}>
-              {filteredPharmacies.length} {filteredPharmacies.length > 1 ? "trouvées" : "trouvée"}
+              {filteredPharmacies.length}{" "}
+              {filteredPharmacies.length > 1 ? "trouvées" : "trouvée"}
             </Text>
           </View>
 
           <TouchableOpacity
             style={styles.listButton}
-            onPress={() => router.back()}
+            onPress={centerOnUser}
             activeOpacity={0.8}
           >
-            <Ionicons name="list" size={24} color="#00A8E8" />
+            <Ionicons name="locate" size={24} color="#00A8E8" />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
 
-      {/* Boutons de contrôle */}
-      <View style={styles.controlsContainer}>
-        <TouchableOpacity
-          style={styles.controlButton}
-          onPress={centerOnUser}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="locate" size={24} color="#00A8E8" />
-        </TouchableOpacity>
+      <Animated.View
+        style={[styles.bottomSheet, { height: bottomSheetHeight }]}
+      >
+        <View {...panResponder.panHandlers} style={styles.dragHandleArea}>
+          <View style={styles.dragHandle} />
+        </View>
 
-        <TouchableOpacity
-          style={styles.controlButton}
-          onPress={showAllPharmacies}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="expand" size={24} color="#00A8E8" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Bottom Sheet */}
-      <View style={styles.bottomSheet}>
-        {/* Barre de drag */}
-        <View style={styles.dragHandle} />
-
-        {/* En-tête avec filtres */}
         <View style={styles.bottomSheetHeader}>
-          <Text style={styles.bottomSheetTitle}>Pharmacies disponibles</Text>
-          
-          {/* Filtres horizontaux */}
+          <View style={styles.titleRow}>
+            <Text style={styles.bottomSheetTitle}>Pharmacies disponibles</Text>
+            <TouchableOpacity
+              onPress={() =>
+                isExpanded ? collapseBottomSheet() : expandBottomSheet()
+              }
+              style={styles.expandButton}
+            >
+              <Ionicons
+                name={isExpanded ? "chevron-down" : "chevron-up"}
+                size={24}
+                color="#00A8E8"
+              />
+            </TouchableOpacity>
+          </View>
+
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -382,20 +471,22 @@ export default function MapScreen() {
             <TouchableOpacity
               style={[
                 styles.filterChip,
-                filterType === "all" && styles.filterChipActive
+                filterType === "all" && styles.filterChipActive,
               ]}
               onPress={() => handleFilterChange("all")}
               activeOpacity={0.7}
             >
-              <Ionicons 
-                name="apps" 
-                size={16} 
-                color={filterType === "all" ? "white" : "#00A8E8"} 
+              <Ionicons
+                name="apps"
+                size={16}
+                color={filterType === "all" ? "white" : "#00A8E8"}
               />
-              <Text style={[
-                styles.filterText,
-                filterType === "all" && styles.filterTextActive
-              ]}>
+              <Text
+                style={[
+                  styles.filterText,
+                  filterType === "all" && styles.filterTextActive,
+                ]}
+              >
                 Toutes ({pharmacies.length})
               </Text>
             </TouchableOpacity>
@@ -403,98 +494,93 @@ export default function MapScreen() {
             <TouchableOpacity
               style={[
                 styles.filterChip,
-                filterType === "open" && styles.filterChipActive
+                filterType === "open" && styles.filterChipActive,
               ]}
               onPress={() => handleFilterChange("open")}
               activeOpacity={0.7}
             >
-              <Ionicons 
-                name="checkmark-circle" 
-                size={16} 
-                color={filterType === "open" ? "white" : "#4CAF50"} 
+              <Ionicons
+                name="checkmark-circle"
+                size={16}
+                color={filterType === "open" ? "white" : "#4CAF50"}
               />
-              <Text style={[
-                styles.filterText,
-                filterType === "open" && styles.filterTextActive
-              ]}>
-                Ouvertes ({pharmacies.filter(p => p.isOpen).length})
+              <Text
+                style={[
+                  styles.filterText,
+                  filterType === "open" && styles.filterTextActive,
+                ]}
+              >
+                Ouvertes ({pharmacies.filter((p) => p.isOpen).length})
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.filterChip,
-                filterType === "guard" && styles.filterChipActive
+                filterType === "guard" && styles.filterChipActive,
               ]}
               onPress={() => handleFilterChange("guard")}
               activeOpacity={0.7}
             >
-              <Ionicons 
-                name="shield-checkmark" 
-                size={16} 
-                color={filterType === "guard" ? "white" : "#FF9800"} 
+              <Ionicons
+                name="shield-checkmark"
+                size={16}
+                color={filterType === "guard" ? "white" : "#FF9800"}
               />
-              <Text style={[
-                styles.filterText,
-                filterType === "guard" && styles.filterTextActive
-              ]}>
-                De garde ({pharmacies.filter(p => p.isGuard).length})
+              <Text
+                style={[
+                  styles.filterText,
+                  filterType === "guard" && styles.filterTextActive,
+                ]}
+              >
+                De garde ({pharmacies.filter((p) => p.isGuard).length})
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[
                 styles.filterChip,
-                filterType === "nearby" && styles.filterChipActive
+                filterType === "nearby" && styles.filterChipActive,
               ]}
               onPress={() => handleFilterChange("nearby")}
               activeOpacity={0.7}
             >
-              <Ionicons 
-                name="location" 
-                size={16} 
-                color={filterType === "nearby" ? "white" : "#E91E63"} 
+              <Ionicons
+                name="location"
+                size={16}
+                color={filterType === "nearby" ? "white" : "#E91E63"}
               />
-              <Text style={[
-                styles.filterText,
-                filterType === "nearby" && styles.filterTextActive
-              ]}>
-                À proximité ({pharmacies.filter(p => parseFloat(p.distance) < 5).length})
+              <Text
+                style={[
+                  styles.filterText,
+                  filterType === "nearby" && styles.filterTextActive,
+                ]}
+              >
+                À proximité (
+                {pharmacies.filter((p) => parseFloat(p.distance) < 5).length})
               </Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
 
-        {/* Liste des pharmacies */}
         {filteredPharmacies.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="search-outline" size={48} color="#BDBDBD" />
             <Text style={styles.emptyText}>Aucune pharmacie trouvée</Text>
-            <Text style={styles.emptySubtext}>
-              Essayez un autre filtre
-            </Text>
+            <Text style={styles.emptySubtext}>Essayez un autre filtre</Text>
           </View>
         ) : (
           <ScrollView
-            ref={scrollRef}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.pharmaciesList}
-            snapToInterval={CARD_WIDTH + 16}
-            decelerationRate="fast"
-            onMomentumScrollEnd={(event) => {
-              const index = Math.round(event.nativeEvent.contentOffset.x / (CARD_WIDTH + 16));
-              if (filteredPharmacies[index]) {
-                focusOnPharmacy(filteredPharmacies[index], index);
-              }
-            }}
+            style={styles.pharmaciesScrollView}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.pharmaciesGrid}
           >
             {filteredPharmacies.map((pharmacy, index) => (
               <TouchableOpacity
                 key={pharmacy.id}
                 style={[
                   styles.pharmacyCard,
-                  index === activeCardIndex && styles.pharmacyCardActive
+                  index === activeCardIndex && styles.pharmacyCardActive,
                 ]}
                 activeOpacity={0.9}
                 onPress={() => focusOnPharmacy(pharmacy, index)}
@@ -504,73 +590,69 @@ export default function MapScreen() {
                   style={styles.pharmacyImage}
                   resizeMode="cover"
                 />
-                
+
+                {pharmacy.isGuard && (
+                  <View style={styles.guardBadgeTop}>
+                    <Ionicons name="shield-checkmark" size={12} color="white" />
+                    <Text style={styles.guardBadgeTopText}>GARDE</Text>
+                  </View>
+                )}
+
                 <View style={styles.cardContent}>
-                  <View style={styles.cardHeader}>
-                    <View style={styles.pharmacyTitleRow}>
-                      <Text style={styles.pharmacyName} numberOfLines={1}>
-                        {pharmacy.name}
-                      </Text>
-                      {pharmacy.isGuard && (
-                        <View style={styles.guardBadge}>
-                          <Ionicons name="shield-checkmark" size={12} color="#FF9800" />
-                          <Text style={styles.guardBadgeText}>GARDE</Text>
-                        </View>
-                      )}
-                    </View>
-                    <View style={styles.ratingRow}>
-                      <Ionicons name="star" size={14} color="#FFD700" />
-                      <Text style={styles.ratingText}>{pharmacy.rating}</Text>
-                    </View>
+                  <Text style={styles.pharmacyName} numberOfLines={2}>
+                    {pharmacy.name}
+                  </Text>
+
+                  <View style={styles.ratingRow}>
+                    <Ionicons name="star" size={12} color="#FFD700" />
+                    <Text style={styles.ratingText}>{pharmacy.rating}</Text>
                   </View>
 
                   <View style={styles.addressRow}>
-                    <Ionicons name="location-outline" size={14} color="#666" />
+                    <Ionicons name="location-outline" size={12} color="#666" />
                     <Text style={styles.pharmacyAddress} numberOfLines={1}>
-                      {pharmacy.address}
+                      {pharmacy.city}
                     </Text>
                   </View>
 
                   <View style={styles.infoRow}>
                     <View style={styles.statusBadge}>
-                      <View style={[
-                        styles.statusDot,
-                        pharmacy.isOpen ? styles.statusOpen : styles.statusClosed
-                      ]} />
+                      <View
+                        style={[
+                          styles.statusDot,
+                          pharmacy.isOpen
+                            ? styles.statusOpen
+                            : styles.statusClosed,
+                        ]}
+                      />
                       <Text style={styles.statusText}>
-                        {pharmacy.isOpen ? `Jusqu'à ${pharmacy.closingTime}` : "Fermée"}
+                        {pharmacy.isOpen ? pharmacy.closingTime : "Fermée"}
                       </Text>
                     </View>
 
                     <View style={styles.distanceBadge}>
-                      <Ionicons name="navigate" size={14} color="#00A8E8" />
-                      <Text style={styles.distanceText}>{pharmacy.distance}</Text>
+                      <Ionicons name="navigate" size={12} color="#00A8E8" />
+                      <Text style={styles.distanceText}>
+                        {pharmacy.distance} km
+                      </Text>
                     </View>
                   </View>
 
+                  {/* Bouton Voir les détails */}
                   <TouchableOpacity
                     style={styles.detailsButton}
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      router.push(`/pharmacy/${pharmacy.id}`);
-                    }}
+                    onPress={() => handleViewDetails(pharmacy)}
+                    activeOpacity={0.8}
                   >
-                    <LinearGradient
-                      colors={['#00A8E8', '#0288D1']}
-                      style={styles.detailsButtonGradient}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                    >
-                      <Text style={styles.detailsButtonText}>Voir les détails</Text>
-                      <Ionicons name="arrow-forward" size={16} color="white" />
-                    </LinearGradient>
+                    <Text style={styles.detailsButtonText}>Voir les détails</Text>
+                    <Ionicons name="arrow-forward" size={14} color="#00A8E8" />
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>
             ))}
           </ScrollView>
         )}
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -670,19 +752,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 12,
   },
-  guardPulse: {
-    position: "absolute",
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#FF9800",
-    opacity: 0.2,
-  },
   controlsContainer: {
     position: "absolute",
     right: 16,
-    bottom: 280,
+    top: Platform.OS === "ios" ? 120 : 140,
     gap: 12,
+    zIndex: 999,
+    paddingTop: 18,
   },
   controlButton: {
     width: 48,
@@ -705,31 +781,44 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
-    paddingTop: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.15,
     shadowRadius: 16,
     elevation: 16,
-    maxHeight: height * 0.45,
+  },
+  dragHandleArea: {
+    paddingVertical: 12,
+    alignItems: "center",
   },
   dragHandle: {
     width: 40,
     height: 4,
     backgroundColor: "#E0E0E0",
     borderRadius: 2,
-    alignSelf: "center",
-    marginBottom: 16,
   },
   bottomSheetHeader: {
     paddingHorizontal: 16,
     marginBottom: 16,
   },
+  titleRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
   bottomSheetTitle: {
     fontSize: 20,
     fontWeight: "800",
     color: "#1A237E",
-    marginBottom: 12,
+  },
+  expandButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F0F8FF",
+    justifyContent: "center",
+    alignItems: "center",
   },
   filtersScroll: {
     marginHorizontal: -16,
@@ -761,23 +850,28 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: "white",
   },
-  pharmaciesList: {
+  pharmaciesScrollView: {
+    flex: 1,
+  },
+  pharmaciesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     paddingHorizontal: 16,
     paddingBottom: Platform.OS === "ios" ? 34 : 20,
+    gap: 16,
   },
   pharmacyCard: {
     width: CARD_WIDTH,
     backgroundColor: "white",
-    borderRadius: 20,
-    marginRight: 16,
+    borderRadius: 16,
     overflow: "hidden",
     borderWidth: 2,
     borderColor: "transparent",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   pharmacyCardActive: {
     borderColor: "#00A8E8",
@@ -786,62 +880,54 @@ const styles = StyleSheet.create({
   },
   pharmacyImage: {
     width: "100%",
-    height: 140,
+    height: 100,
   },
-  cardContent: {
-    padding: 16,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  pharmacyTitleRow: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginRight: 8,
-  },
-  pharmacyName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1A237E",
-    flex: 1,
-  },
-  guardBadge: {
+  guardBadgeTop: {
+    position: "absolute",
+    top: 8,
+    right: 8,
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "#FFF3E0",
+    backgroundColor: "#FF9800",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
-  guardBadgeText: {
-    fontSize: 10,
+  guardBadgeTopText: {
+    fontSize: 9,
     fontWeight: "800",
-    color: "#FF9800",
+    color: "white",
+  },
+  cardContent: {
+    padding: 12,
+  },
+  pharmacyName: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#1A237E",
+    marginBottom: 6,
+    minHeight: 32,
   },
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    marginBottom: 6,
   },
   ratingText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "700",
     color: "#333",
   },
   addressRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginBottom: 12,
+    gap: 4,
+    marginBottom: 8,
   },
   pharmacyAddress: {
-    fontSize: 13,
+    fontSize: 11,
     color: "#666",
     flex: 1,
   },
@@ -854,16 +940,16 @@ const styles = StyleSheet.create({
   statusBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 4,
     backgroundColor: "#F5F5F5",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
   },
   statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   statusOpen: {
     backgroundColor: "#4CAF50",
@@ -872,7 +958,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F44336",
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "600",
     color: "#666",
   },
@@ -882,25 +968,27 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   distanceText: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "700",
     color: "#00A8E8",
   },
+  // Styles pour le bouton Voir les détails
   detailsButton: {
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  detailsButtonGradient: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 12,
+    justifyContent: "space-between",
+    backgroundColor: "#F0F8FF",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#00A8E8",
+    marginTop: 4,
   },
   detailsButtonText: {
-    fontSize: 15,
+    fontSize: 11,
     fontWeight: "700",
-    color: "white",
+    color: "#00A8E8",
   },
   emptyState: {
     paddingVertical: 40,

@@ -27,6 +27,8 @@ const pharmaciesData = {
     closingTime: "22:00",
     isOpen: true,
     deliveryTime: "10-20 min",
+    phone: "+225 01 23 45 67 89",
+    reviews : 4.5,
     image:
       "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=800&q=80",
   },
@@ -39,6 +41,8 @@ const pharmaciesData = {
     closingTime: "20:30",
     isOpen: true,
     deliveryTime: "20-30 min",
+    phone: "+225 01 23 45 67 89",
+    reviews : 4.5,
     image:
       "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=800&q=80",
   },
@@ -51,6 +55,8 @@ const pharmaciesData = {
     closingTime: "21:00",
     isOpen: false,
     deliveryTime: "—",
+    phone: "+225 01 23 45 67 89",
+    reviews : 4.0,
     image:
       "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=800&q=80",
   },
@@ -63,6 +69,8 @@ const pharmaciesData = {
     closingTime: "23:00",
     isOpen: true,
     deliveryTime: "5-15 min",
+    phone: "+225 01 23 45 67 89",
+    reviews : 4.8,
     image:
       "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&q=80",
   },
@@ -75,6 +83,8 @@ const pharmaciesData = {
     closingTime: "20:00",
     isOpen: true,
     deliveryTime: "15-25 min",
+    phone: "+225 01 23 45 67 89",
+    reviews : 4.2,
     image:
       "https://images.unsplash.com/photo-1585435421671-0c16764179c0?w=800&q=80",
   },
@@ -117,24 +127,25 @@ export default function PharmacyDetailsScreen() {
     { id: "2", name: "Dermatologie", icon: "body-outline", color: "#2196F3" },
     {
       id: "3",
-      name: "Douleurs articulaires et musculaires",
+      name: "Douleurs",
       icon: "fitness-outline",
       color: "#FF9800",
     },
     { id: "4", name: "Soins des yeux", icon: "eye-outline", color: "#9C27B0" },
     { id: "5", name: "Santé ORL", icon: "ear-outline", color: "#00BCD4" },
-    {
-      id: "6",
-      name: "Premiers secours",
-      icon: "medkit-outline",
-      color: "#F44336",
-    },
+    
     { id: "7", name: "Soins bébé", icon: "happy-outline", color: "#FF4081" },
     {
       id: "8",
       name: "Hygiène bucco-dentaire",
       icon: "sparkles-outline",
       color: "#795548",
+    },
+    {
+      id: "6",
+      name: "Premiers secours",
+      icon: "medkit-outline",
+      color: "#F44336",
     },
   ];
 
@@ -419,7 +430,7 @@ export default function PharmacyDetailsScreen() {
                   key={category.id}
                   style={styles.categoryCard}
                   activeOpacity={0.7}
-                  onPress={() => router.push(`/category/${category.id}`)}
+                  onPress={() => router.push(`/all-products`)}
                 >
                   <View
                     style={[
@@ -982,7 +993,7 @@ const styles = StyleSheet.create({
   searchWrapper: {
     backgroundColor: "white",
     borderRadius: 12,
-    padding: 4,
+    paddingTop: 4,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -1065,6 +1076,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
+    paddingBottom: 6,
     fontSize: 22,
     fontWeight: "800",
     color: "#1A1A1A",

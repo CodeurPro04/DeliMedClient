@@ -17,7 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { PharmacyCard } from "@/components/pharmacy/PharmacyCard";
-import { styles } from "./styles";
+import { styles } from "./stylesindex";
 import { useRouter } from "expo-router";
 import * as Location from "expo-location";
 
