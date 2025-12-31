@@ -11,6 +11,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Image,
   Animated,
   Dimensions,
   ActivityIndicator,
@@ -25,11 +26,10 @@ const { width, height } = Dimensions.get("window");
 export default function LoginScreen() {
   const router = useRouter();
   const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [secureText, setSecureText] = useState(true);
+  const [secretCode, setSecretCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
-  
+
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -51,9 +51,16 @@ export default function LoginScreen() {
   }, []);
 
   const handleLogin = async () => {
-    if (!phone || !password) {
+    if (!phone || !secretCode) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       Alert.alert("Champs manquants", "Veuillez remplir tous les champs");
+      return;
+    }
+
+    // Validation du code secret (ex: 4 chiffres minimum)
+    if (secretCode.length < 4) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert("Code invalide", "Le code secret doit contenir au moins 4 chiffres");
       return;
     }
 
@@ -84,16 +91,14 @@ export default function LoginScreen() {
 
   const handleSocialLogin = async (provider: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Alert.alert(
-      `Connexion ${provider}`,
-      `Fonctionnalité ${provider} à venir`,
-      [{ text: "OK", style: "default" }]
-    );
+    Alert.alert(`Connexion ${provider}`, `Fonctionnalité ${provider} à venir`, [
+      { text: "OK", style: "default" },
+    ]);
   };
 
-  const handleForgotPassword = () => {
+  const handleForgotCode = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    router.push("/forgot-password");
+    router.push("/forgot-code");
   };
 
   const handleSignUp = () => {
@@ -104,11 +109,11 @@ export default function LoginScreen() {
   const formatPhoneNumber = (text: string) => {
     const cleaned = text.replace(/\D/g, "");
     const match = cleaned.match(/^(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
-    
+
     if (match) {
       return `${match[1]} ${match[2]} ${match[3]} ${match[4]} ${match[5]}`;
     }
-    
+
     return text;
   };
 
@@ -117,15 +122,21 @@ export default function LoginScreen() {
     setPhone(formatted);
   };
 
+  const handleSecretCodeChange = (text: string) => {
+    // N'autoriser que les chiffres
+    const numericText = text.replace(/[^0-9]/g, "");
+    setSecretCode(numericText);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
+
       <LinearGradient
         colors={["#FFFFFF", "#F8FAFF"]}
         style={StyleSheet.absoluteFill}
       />
-      
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
@@ -144,7 +155,7 @@ export default function LoginScreen() {
                 transform: [{ translateY: slideAnim }],
               },
             ]}
-          > 
+          >
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => router.back()}
@@ -152,12 +163,12 @@ export default function LoginScreen() {
             >
               <Ionicons name="chevron-back" size={28} color="#1A1A1A" />
             </TouchableOpacity>
-            
+
             <View style={styles.headerTitleContainer}>
               <Text style={styles.headerTitle}>Connexion</Text>
               <View style={styles.headerIndicator} />
             </View>
-            
+
             <View style={styles.headerPlaceholder} />
           </Animated.View>
 
@@ -172,16 +183,13 @@ export default function LoginScreen() {
             ]}
           >
             <View style={styles.logoContainer}>
-              <LinearGradient
-                colors={["#00A8E8", "#0097D7"]}
-                style={styles.logoGradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
-                <Ionicons name="medical" size={32} color="white" />
-              </LinearGradient>
+              <Image
+                source={require("@/assets/images/logo2.png")}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
             </View>
-            
+
             <Text style={styles.welcomeTitle}>Content de vous revoir !</Text>
             <Text style={styles.welcomeSubtitle}>
               Connectez-vous pour accéder à vos services de santé
@@ -204,7 +212,7 @@ export default function LoginScreen() {
                 <Ionicons name="call-outline" size={16} color="#666" />
                 <Text style={styles.label}>Numéro de téléphone</Text>
               </View>
-              
+
               <View
                 style={[
                   styles.inputContainer,
@@ -240,67 +248,54 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            {/* Password Input */}
+            {/* Code Secret Input */}
             <View style={styles.inputGroup}>
               <View style={styles.labelContainer}>
-                <Ionicons name="lock-closed-outline" size={16} color="#666" />
-                <Text style={styles.label}>Mot de passe</Text>
+                <Ionicons name="key-outline" size={16} color="#666" />
+                <Text style={styles.label}>Code secret</Text>
               </View>
-              
+
               <View
                 style={[
                   styles.inputContainer,
-                  focusedInput === "password" && styles.inputContainerFocused,
+                  focusedInput === "secretCode" && styles.inputContainerFocused,
                 ]}
               >
                 <TextInput
                   style={[styles.input, { flex: 1 }]}
-                  placeholder="Votre mot de passe"
+                  placeholder="1234"
                   placeholderTextColor="#A0A0A0"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={secureText}
+                  value={secretCode}
+                  onChangeText={handleSecretCodeChange}
+                  keyboardType="numeric"
+                  maxLength={6}
                   autoCapitalize="none"
-                  onFocus={() => setFocusedInput("password")}
+                  onFocus={() => setFocusedInput("secretCode")}
                   onBlur={() => setFocusedInput(null)}
                   selectionColor="#00A8E8"
+                  secureTextEntry={false} // Afficher les chiffres
                 />
-                
-                <View style={styles.passwordActions}>
-                  {password.length > 0 && (
+
+                <View style={styles.codeActions}>
+                  {secretCode.length > 0 && (
                     <TouchableOpacity
                       style={styles.clearButton}
-                      onPress={() => setPassword("")}
+                      onPress={() => setSecretCode("")}
                       activeOpacity={0.7}
                     >
                       <Ionicons name="close-circle" size={20} color="#A0A0A0" />
                     </TouchableOpacity>
                   )}
-                  
-                  <TouchableOpacity
-                    style={styles.eyeButton}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setSecureText(!secureText);
-                    }}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons
-                      name={secureText ? "eye-off-outline" : "eye-outline"}
-                      size={22}
-                      color="#666"
-                    />
-                  </TouchableOpacity>
                 </View>
               </View>
-              
+
               <TouchableOpacity
-                style={styles.forgotPassword}
-                onPress={handleForgotPassword}
+                style={styles.forgotCode}
+                onPress={handleForgotCode}
                 activeOpacity={0.7}
               >
-                <Text style={styles.forgotPasswordText}>
-                  Mot de passe oublié ?
+                <Text style={styles.forgotCodeText}>
+                  Code secret oublié ?
                 </Text>
                 <Ionicons name="arrow-forward" size={16} color="#00A8E8" />
               </TouchableOpacity>
@@ -312,15 +307,15 @@ export default function LoginScreen() {
                 style={[
                   styles.loginButton,
                   isLoading && styles.loginButtonLoading,
-                  (!phone || !password) && styles.loginButtonDisabled,
+                  (!phone || !secretCode) && styles.loginButtonDisabled,
                 ]}
                 onPress={handleLogin}
-                disabled={isLoading || !phone || !password}
+                disabled={isLoading || !phone || !secretCode}
                 activeOpacity={0.9}
               >
                 <LinearGradient
                   colors={
-                    !phone || !password
+                    !phone || !secretCode
                       ? ["#E0E0E0", "#D0D0D0"]
                       : ["#00A8E8", "#0097D7"]
                   }
@@ -340,7 +335,7 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </Animated.View>
 
-            {/* option connexion */}
+            {/* Option connexion */}
             <View style={styles.quickLoginSection}>
               <View style={styles.divider}>
                 <View style={styles.dividerLine} />
@@ -383,14 +378,6 @@ export default function LoginScreen() {
                 <Ionicons name="chevron-forward" size={18} color="#00A8E8" />
               </TouchableOpacity>
             </View>
-
-            {/* note de securiter
-            <View style={styles.securityNote}>
-              <Ionicons name="shield-checkmark" size={16} color="#4CAF50" />
-              <Text style={styles.securityNoteText}>
-                Vos données sont sécurisées et cryptées
-              </Text>
-            </View> */}
           </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -447,12 +434,22 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     paddingHorizontal: 32,
-    marginTop: 20,
-    marginBottom: 40,
+    marginTop: 10,
+    marginBottom: 30,
     alignItems: "center",
   },
   logoContainer: {
-    marginBottom: 24,
+    marginBottom: 16,
+    width: '100%',
+    alignItems: 'center',
+  },
+  logoImage: {
+    width: width * 0.3,
+    height: width * 0.3 * 0.9,
+    maxWidth: 140, 
+    maxHeight: 126,
+    minWidth: 80,
+    minHeight: 72,
   },
   logoGradient: {
     width: 72,
@@ -470,7 +467,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "800",
     color: "#1A1A1A",
-    marginBottom: 12,
+    marginBottom: 8,
     textAlign: "center",
     letterSpacing: -0.5,
   },
@@ -547,22 +544,18 @@ const styles = StyleSheet.create({
   clearButton: {
     padding: 4,
   },
-  passwordActions: {
+  codeActions: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
   },
-  eyeButton: {
-    padding: 4,
-  },
-  forgotPassword: {
+  forgotCode: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
     gap: 6,
     marginTop: 12,
   },
-  forgotPasswordText: {
+  forgotCodeText: {
     fontSize: 14,
     color: "#00A8E8",
     fontWeight: "600",

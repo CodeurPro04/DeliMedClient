@@ -41,7 +41,7 @@ export default function Onboarding1() {
       {/* Content */}
       <View style={styles.content}>
         <Text style={styles.title}>
-          Commandez vos médicaments en quelques clics
+          Commandez vos médicaments et produits paraphamarceutiques en quelques clics
         </Text>
         <Text style={styles.description}>
           Accédez à des milliers de produits de santé et faites-vous livrer en moins de 30 minutes.
