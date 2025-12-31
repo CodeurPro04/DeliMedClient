@@ -8,7 +8,6 @@ import {
   SafeAreaView,
   StatusBar,
   Image,
-  TextInput,
   Modal,
   Alert,
   ActivityIndicator,
@@ -16,6 +15,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SearchBar } from "@/components/ui/SearchBar";
+import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
 
 const pharmaciesData = {
   "1": {
@@ -28,7 +29,7 @@ const pharmaciesData = {
     isOpen: true,
     deliveryTime: "10-20 min",
     phone: "+225 01 23 45 67 89",
-    reviews : 4.5,
+    reviews: 4.5,
     image:
       "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=800&q=80",
   },
@@ -42,7 +43,7 @@ const pharmaciesData = {
     isOpen: true,
     deliveryTime: "20-30 min",
     phone: "+225 01 23 45 67 89",
-    reviews : 4.5,
+    reviews: 4.5,
     image:
       "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=800&q=80",
   },
@@ -56,13 +57,13 @@ const pharmaciesData = {
     isOpen: false,
     deliveryTime: "—",
     phone: "+225 01 23 45 67 89",
-    reviews : 4.0,
+    reviews: 4.0,
     image:
       "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=800&q=80",
   },
   "4": {
     id: "4",
-    name: "Pharmacie d’Angré Château",
+    name: "Pharmacie d'Angré Château",
     address: "Angré 8e Tranche, Cocody, Abidjan",
     city: "Cocody",
     distance: "3.1 km",
@@ -70,7 +71,7 @@ const pharmaciesData = {
     isOpen: true,
     deliveryTime: "5-15 min",
     phone: "+225 01 23 45 67 89",
-    reviews : 4.8,
+    reviews: 4.8,
     image:
       "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&q=80",
   },
@@ -84,23 +85,23 @@ const pharmaciesData = {
     isOpen: true,
     deliveryTime: "15-25 min",
     phone: "+225 01 23 45 67 89",
-    reviews : 4.2,
+    reviews: 4.2,
     image:
       "https://images.unsplash.com/photo-1585435421671-0c16764179c0?w=800&q=80",
   },
-  "6":{
-      id: "6",
-      name: "Pharmacie de Marcory Zone 4",
-      address: "Zone 4C, Marcory, Abidjan",
-      city: "Marcory",
-      distance: "5.4 km",
-      closingTime: "22:30",
-      isOpen: true,
-      deliveryTime: "15-30 min",
-      phone: "+225 01 23 45 67 89",
-      reviews : 4.2,
-      image:
-        "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80",
+  "6": {
+    id: "6",
+    name: "Pharmacie de Marcory Zone 4",
+    address: "Zone 4C, Marcory, Abidjan",
+    city: "Marcory",
+    distance: "5.4 km",
+    closingTime: "22:30",
+    isOpen: true,
+    deliveryTime: "15-30 min",
+    phone: "+225 01 23 45 67 89",
+    reviews: 4.2,
+    image:
+      "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80",
   },
 };
 
@@ -113,6 +114,9 @@ export default function PharmacyDetailsScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [pharmacy, setPharmacy] = useState<any>(null);
+  const [hasPrescription, setHasPrescription] = useState(false);
+  const [uploadingPrescription, setUploadingPrescription] = useState(false);
+  const [prescriptionFile, setPrescriptionFile] = useState<any>(null);
 
   // Récupere l'ID depuis l'URL
   const pharmacyId = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -287,14 +291,222 @@ export default function PharmacyDetailsScreen() {
     }
   };
 
-  const handleOrder = () => {
-    if (selectedProducts.length === 0) {
-      Alert.alert("Panier vide", "Ajoutez des produits avant de commander");
+  // Fonction pour prendre une photo
+  const handleTakePhoto = async () => {
+    try {
+      // Demander la permission d'accéder à la caméra
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission requise",
+          "L'accès à la caméra est nécessaire pour prendre une photo de votre ordonnance."
+        );
+        return;
+      }
+
+      // Ouvrir la caméra
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        allowsEditing: true,
+        aspect: [4, 3],
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const file = {
+          uri: result.assets[0].uri,
+          name: `ordonnance_${Date.now()}.jpg`,
+          type: 'image/jpeg',
+          size: result.assets[0].fileSize || 0,
+        };
+        setPrescriptionFile(file);
+        handleUploadPrescription("photo", file);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la prise de photo:", error);
+      Alert.alert("Erreur", "Impossible de prendre la photo");
+    }
+  };
+
+  // Fonction pour choisir depuis la galerie
+  const handlePickFromGallery = async () => {
+    try {
+      // Demander la permission d'accéder à la galerie
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission requise",
+          "L'accès à la galerie est nécessaire pour sélectionner une photo."
+        );
+        return;
+      }
+
+      // Ouvrir la galerie
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.8,
+        allowsMultipleSelection: false,
+        selectionLimit: 1,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const file = {
+          uri: result.assets[0].uri,
+          name: result.assets[0].fileName || `ordonnance_${Date.now()}.jpg`,
+          type: result.assets[0].mimeType || 'image/jpeg',
+          size: result.assets[0].fileSize || 0,
+        };
+        setPrescriptionFile(file);
+        handleUploadPrescription("galerie", file);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la sélection:", error);
+      Alert.alert("Erreur", "Impossible de sélectionner l'image");
+    }
+  };
+
+  // Fonction pour choisir un PDF
+  const handlePickPDF = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "application/pdf",
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const file = {
+          uri: result.assets[0].uri,
+          name: result.assets[0].name,
+          type: result.assets[0].mimeType,
+          size: result.assets[0].size,
+        };
+        setPrescriptionFile(file);
+        handleUploadPrescription("pdf", file);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la sélection du PDF:", error);
+      Alert.alert("Erreur", "Impossible de sélectionner le PDF");
+    }
+  };
+
+  // Fonction pour simuler l'envoi d'une ordonnance
+  const handleUploadPrescription = async (method: string, file: any) => {
+    setPrescriptionModalVisible(false);
+    setUploadingPrescription(true);
+
+    // Vérification fictive de la taille du fichier
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+      setTimeout(() => {
+        setUploadingPrescription(false);
+        Alert.alert(
+          "Fichier trop volumineux",
+          "La taille du fichier dépasse 5MB. Veuillez sélectionner un fichier plus petit.",
+          [{ text: "OK" }]
+        );
+      }, 1000);
       return;
     }
+
+    // Simulation d'un délai d'envoi avec progression
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      if (progress >= 100) {
+        clearInterval(interval);
+        
+        setTimeout(() => {
+          setUploadingPrescription(false);
+          setHasPrescription(true);
+          
+          // Format du nom de fichier pour l'affichage
+          const fileName = file.name || 
+            (method === "photo" ? "Photo.jpg" : 
+             method === "galerie" ? "Image.jpg" : "Document.pdf");
+          
+          // Confirmation fictive avec détails du fichier
+          Alert.alert(
+            "✅ Ordonnance envoyée avec succès !",
+            `Votre ordonnance "${fileName}" a été envoyée à ${pharmacy.name}.\n\n` +
+            `• Format: ${file.type || 'Non spécifié'}\n` +
+            `• Taille: ${(file.size / 1024 / 1024).toFixed(2)} MB\n` +
+            `• Méthode: ${method === "photo" ? "Photo prise" : method === "galerie" ? "Galerie" : "PDF"}\n\n` +
+            `Le pharmacien vérifie maintenant votre ordonnance et prépare vos médicaments. ` +
+            `Vous recevrez une notification lorsque votre commande sera prête.`,
+            [
+              {
+                text: "Compris",
+                onPress: () => console.log("Confirmation acceptée"),
+              },
+              {
+                text: "Voir les détails",
+                onPress: () => {
+                  Alert.alert(
+                    "Détails de l'envoi",
+                    `Pharmacie: ${pharmacy.name}\n` +
+                    `Fichier: ${fileName}\n` +
+                    `Envoyé le: ${new Date().toLocaleDateString('fr-FR')}\n` +
+                    `Heure: ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}\n` +
+                    `Statut: En cours de vérification`,
+                    [{ text: "Fermer" }]
+                  );
+                },
+              },
+            ]
+          );
+        }, 500);
+      }
+    }, 100);
+  };
+
+  const handleOrder = () => {
+    if (selectedProducts.length === 0 && !hasPrescription) {
+      Alert.alert(
+        "Panier vide",
+        "Ajoutez des produits ou une ordonnance avant de commander"
+      );
+      return;
+    }
+
+    if (hasPrescription && selectedProducts.length === 0) {
+      Alert.alert(
+        "Commande avec ordonnance",
+        `Le pharmacien prépare actuellement les médicaments de votre ordonnance ${
+          prescriptionFile ? `(${prescriptionFile.name})` : ""
+        }. Souhaitez-vous ajouter d'autres produits ou finaliser la commande ?`,
+        [
+          {
+            text: "Ajouter des produits",
+            style: "cancel",
+          },
+          {
+            text: "Finaliser",
+            onPress: () => {
+              router.push({
+                pathname: "/cart",
+                params: {
+                  pharmacyId: pharmacy.id,
+                  hasPrescription: "true",
+                  prescriptionFile: prescriptionFile ? JSON.stringify(prescriptionFile) : "",
+                },
+              });
+            },
+          },
+        ]
+      );
+      return;
+    }
+
     router.push({
       pathname: "/cart",
-      params: { pharmacyId: pharmacy.id, products: selectedProducts.join(",") },
+      params: {
+        pharmacyId: pharmacy.id,
+        products: selectedProducts.join(","),
+        hasPrescription: hasPrescription.toString(),
+        prescriptionFile: prescriptionFile ? JSON.stringify(prescriptionFile) : "",
+      },
     });
   };
 
@@ -377,7 +589,7 @@ export default function PharmacyDetailsScreen() {
             <View style={styles.ratingContainer}>
               <Ionicons name="star" size={14} color="#FFD700" />
               <Text style={styles.ratingText}>
-                {pharmacy.rating} ({pharmacy.reviews} avis)
+                {pharmacy.reviews} ({pharmacy.reviews} avis)
               </Text>
             </View>
           </View>
@@ -388,23 +600,62 @@ export default function PharmacyDetailsScreen() {
           <Text style={styles.sectionTitle}>Une ordonnance ?</Text>
           <Text style={styles.sectionDescription}>
             Ajoutez votre ordonnance au format PDF ou photo. Le pharmacien va
-            préparer votre commande. Vous n'avez pas besoin de sélectionner le
+            préparer votre commande. Vous n&apos;avez pas besoin de sélectionner le
             contenu de votre ordonnance depuis le catalogue des produits.
           </Text>
 
-          <TouchableOpacity
-            style={styles.addPrescriptionButton}
-            onPress={handleAddPrescription}
-            activeOpacity={0.8}
-          >
-            <View style={styles.addButtonContent}>
-              <Ionicons name="add-circle-outline" size={24} color="#00A8E8" />
-              <Text style={styles.addButtonText}>Ajouter une ordonnance</Text>
+          {hasPrescription ? (
+            <View style={styles.prescriptionSuccessCard}>
+              <View style={styles.successIconContainer}>
+                <Ionicons name="checkmark-circle" size={48} color="#4CAF50" />
+              </View>
+              <View style={styles.successTextContainer}>
+                <Text style={styles.successTitle}>Ordonnance envoyée !</Text>
+                <Text style={styles.successDescription}>
+                  {prescriptionFile 
+                    ? `Votre fichier "${prescriptionFile.name}" a été envoyé.`
+                    : "Votre ordonnance a été envoyée avec succès."
+                  }
+                </Text>
+                <View style={styles.statusBadge}>
+                  <View style={styles.statusDot} />
+                  <Text style={styles.statusText}>En cours de vérification</Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={styles.changeButton}
+                onPress={() => {
+                  Alert.alert(
+                    "Modifier l'ordonnance ?",
+                    "Souhaitez-vous envoyer une nouvelle ordonnance ?",
+                    [
+                      { text: "Annuler", style: "cancel" },
+                      {
+                        text: "Envoyer une nouvelle",
+                        onPress: () => setPrescriptionModalVisible(true),
+                      },
+                    ]
+                  );
+                }}
+              >
+                <Ionicons name="create-outline" size={20} color="#00A8E8" />
+              </TouchableOpacity>
             </View>
-            <Text style={styles.addButtonSubtext}>
-              PDF, JPG, PNG jusqu'à 5MB
-            </Text>
-          </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.addPrescriptionButton}
+              onPress={handleAddPrescription}
+              activeOpacity={0.8}
+            >
+              <View style={styles.addButtonContent}>
+                <Ionicons name="add-circle-outline" size={24} color="#00A8E8" />
+                <Text style={styles.addButtonText}>Ajouter une ordonnance</Text>
+              </View>
+              <Text style={styles.addButtonSubtext}>
+                PDF, JPG, PNG jusqu&apos;à 5MB
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Section Recherche de produits */}
@@ -618,18 +869,52 @@ export default function PharmacyDetailsScreen() {
         <View style={{ height: 100 }} />
       </ScrollView>
 
+      {/* Indicateur d'upload */}
+      {uploadingPrescription && (
+        <View style={styles.uploadOverlay}>
+          <View style={styles.uploadCard}>
+            <ActivityIndicator size="large" color="#00A8E8" />
+            <Text style={styles.uploadText}>Envoi de votre ordonnance...</Text>
+            <Text style={styles.uploadSubtext}>
+              Préparation de l'envoi vers {pharmacy.name}
+            </Text>
+            {prescriptionFile && (
+              <Text style={styles.fileInfo}>
+                Fichier: {prescriptionFile.name}
+              </Text>
+            )}
+          </View>
+        </View>
+      )}
+
       {/* Bouton Commander */}
-      {selectedProducts.length > 0 && (
+      {(selectedProducts.length > 0 || hasPrescription) && (
         <View style={styles.floatingButtonContainer}>
           <TouchableOpacity
             style={styles.floatingButton}
             onPress={handleOrder}
             activeOpacity={0.8}
           >
-            <View style={styles.cartIndicator}>
-              <Text style={styles.cartCount}>{selectedProducts.length}</Text>
+            {selectedProducts.length > 0 && (
+              <View style={styles.cartIndicator}>
+                <Text style={styles.cartCount}>{selectedProducts.length}</Text>
+              </View>
+            )}
+            <View style={styles.buttonContent}>
+              {hasPrescription && selectedProducts.length === 0 && (
+                <Ionicons
+                  name="document-text"
+                  size={20}
+                  color="white"
+                  style={{ marginRight: 8 }}
+                />
+              )}
+              <Text style={styles.floatingButtonText}>
+                {hasPrescription && selectedProducts.length === 0
+                  ? "Finaliser la commande"
+                  : "Commander"}
+              </Text>
             </View>
-            <Text style={styles.floatingButtonText}>Commander</Text>
             <Text style={styles.deliveryTime}>
               Livraison: {pharmacy.deliveryTime}
             </Text>
@@ -650,28 +935,96 @@ export default function PharmacyDetailsScreen() {
               <Text style={styles.modalTitle}>Ajouter une ordonnance</Text>
               <TouchableOpacity
                 onPress={() => setPrescriptionModalVisible(false)}
+                style={styles.closeButton}
               >
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
 
+            <View style={styles.modalInfo}>
+              <Ionicons name="information-circle-outline" size={20} color="#00A8E8" />
+              <Text style={styles.modalInfoText}>
+                Le pharmacien préparera vos médicaments selon l'ordonnance
+              </Text>
+            </View>
+
             <View style={styles.modalOptions}>
-              <TouchableOpacity style={styles.modalOption}>
-                <Ionicons name="camera" size={32} color="#00A8E8" />
-                <Text style={styles.modalOptionText}>Prendre une photo</Text>
+              <TouchableOpacity 
+                style={styles.modalOption} 
+                onPress={handleTakePhoto}
+                activeOpacity={0.7}
+              >
+                <View style={styles.optionIconContainer}>
+                  <Ionicons name="camera" size={28} color="#00A8E8" />
+                </View>
+                <View style={styles.optionTextContainer}>
+                  <Text style={styles.optionTitle}>Prendre une photo</Text>
+                  <Text style={styles.optionDescription}>
+                    Utilisez votre caméra pour photographier l'ordonnance
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.modalOption}>
-                <Ionicons name="images" size={32} color="#00A8E8" />
-                <Text style={styles.modalOptionText}>
-                  Choisir depuis la galerie
-                </Text>
+              <TouchableOpacity 
+                style={styles.modalOption} 
+                onPress={handlePickFromGallery}
+                activeOpacity={0.7}
+              >
+                <View style={styles.optionIconContainer}>
+                  <Ionicons name="images" size={28} color="#00A8E8" />
+                </View>
+                <View style={styles.optionTextContainer}>
+                  <Text style={styles.optionTitle}>Choisir depuis la galerie</Text>
+                  <Text style={styles.optionDescription}>
+                    Sélectionnez une photo existante dans votre galerie
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.modalOption}>
-                <Ionicons name="document" size={32} color="#00A8E8" />
-                <Text style={styles.modalOptionText}>Importer un PDF</Text>
+              <TouchableOpacity 
+                style={styles.modalOption} 
+                onPress={handlePickPDF}
+                activeOpacity={0.7}
+              >
+                <View style={styles.optionIconContainer}>
+                  <Ionicons name="document" size={28} color="#00A8E8" />
+                </View>
+                <View style={styles.optionTextContainer}>
+                  <Text style={styles.optionTitle}>Importer un PDF</Text>
+                  <Text style={styles.optionDescription}>
+                    Sélectionnez un fichier PDF depuis votre stockage
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#999" />
               </TouchableOpacity>
+            </View>
+
+            <View style={styles.modalRequirements}>
+              <Text style={styles.requirementsTitle}>Exigences :</Text>
+              <View style={styles.requirementsList}>
+                <View style={styles.requirementItem}>
+                  <Ionicons name="checkmark-circle" size={14} color="#4CAF50" />
+                  <Text style={styles.requirementText}>Ordonnance valide et lisible</Text>
+                </View>
+                <View style={styles.requirementItem}>
+                  <Ionicons name="checkmark-circle" size={14} color="#4CAF50" />
+                  <Text style={styles.requirementText}>Format JPG, PNG ou PDF</Text>
+                </View>
+                <View style={styles.requirementItem}>
+                  <Ionicons name="checkmark-circle" size={14} color="#4CAF50" />
+                  <Text style={styles.requirementText}>Taille maximale : 5MB</Text>
+                </View>
+                <View style={styles.requirementItem}>
+                  <Ionicons name="checkmark-circle" size={14} color="#4CAF50" />
+                  <Text style={styles.requirementText}>Date de prescription visible</Text>
+                </View>
+                <View style={styles.requirementItem}>
+                  <Ionicons name="checkmark-circle" size={14} color="#4CAF50" />
+                  <Text style={styles.requirementText}>Signature du médecin</Text>
+                </View>
+              </View>
             </View>
           </View>
         </View>
@@ -801,22 +1154,73 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "500",
   },
+  section: {
+    backgroundColor: "transparent",
+    marginTop: 24,
+    paddingHorizontal: 20,
+  },
+  sectionTitle: {
+    paddingBottom: 6,
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#1A1A1A",
+    letterSpacing: -0.5,
+  },
   sectionDescription: {
     fontSize: 14,
     color: "#666",
     lineHeight: 20,
     marginBottom: 16,
   },
-  sectionHeaderRow: {
+  prescriptionSuccessCard: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    backgroundColor: "#F0FFF4",
+    borderWidth: 1,
+    borderColor: "#C6F6D5",
+    borderRadius: 12,
+    padding: 16,
   },
-  seeAllText: {
-    fontSize: 14,
-    color: "#00A8E8",
+  successIconContainer: {
+    marginRight: 16,
+  },
+  successTextContainer: {
+    flex: 1,
+  },
+  successTitle: {
+    fontSize: 16,
     fontWeight: "600",
+    color: "#22543D",
+    marginBottom: 4,
+  },
+  successDescription: {
+    fontSize: 14,
+    color: "#4A5568",
+    marginBottom: 8,
+  },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#E6FFFA",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    alignSelf: "flex-start",
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#00A8E8",
+    marginRight: 6,
+  },
+  statusText: {
+    fontSize: 12,
+    color: "#00A8E8",
+    fontWeight: "500",
+  },
+  changeButton: {
+    padding: 8,
   },
   addPrescriptionButton: {
     borderWidth: 2,
@@ -841,21 +1245,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#999",
   },
-  searchContainer: {
+  sectionHeaderRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
+    marginBottom: 16,
+  },
+  seeAllText: {
+    fontSize: 14,
+    color: "#00A8E8",
+    fontWeight: "600",
+  },
+  searchWrapper: {
+    backgroundColor: "white",
     borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  searchIcon: {
-    marginRight: 12,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    color: "#333",
+    paddingTop: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
   },
   categoriesScroll: {
     marginHorizontal: -20,
@@ -885,216 +1296,11 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     lineHeight: 16,
   },
-  productsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-  },
-  productHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: 8,
-  },
-  productName: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-    flex: 1,
-    marginRight: 8,
-  },
-  productCategory: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 8,
-  },
-  productPrice: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#00A8E8",
-  },
-  floatingButtonContainer: {
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    right: 20,
-  },
-  floatingButton: {
-    backgroundColor: "#00A8E8",
-    borderRadius: 16,
-    paddingVertical: 18,
-    paddingHorizontal: 24,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  cartIndicator: {
-    position: "absolute",
-    top: -8,
-    left: -8,
-    backgroundColor: "#E91E63",
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "white",
-  },
-  cartCount: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "white",
-  },
-  floatingButtonText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "white",
-    marginHorizontal: 12,
-  },
-  deliveryTime: {
-    position: "absolute",
-    top: -20,
-    fontSize: 12,
-    color: "white",
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "white",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 24,
-    paddingBottom: 40,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 32,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#333",
-  },
-  modalOptions: {
-    gap: 20,
-  },
-  modalOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 16,
-    paddingVertical: 16,
-  },
-  modalOptionText: {
-    fontSize: 16,
-    color: "#333",
-    fontWeight: "500",
-  },
-  searchWrapper: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    paddingTop: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-  },
-  productCardSelected: {
-    borderColor: "#00A8E8",
-    shadowColor: "#00A8E8",
-    shadowOpacity: 0.3,
-    elevation: 6,
-  },
-  productImageContainer: {
-    width: "100%",
-    height: 160,
-    position: "relative",
-  },
-  productImage: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: "#F5F5F5",
-  },
-  imageOverlayGradient: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: "40%",
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
-  },
-  checkboxContainer: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-  },
-
-  stockBadge: {
-    position: "absolute",
-    bottom: 8,
-    left: 8,
-    backgroundColor: "rgba(76, 175, 80, 0.9)",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  stockBadgeLimited: {
-    backgroundColor: "rgba(255, 152, 0, 0.9)",
-  },
-  stockText: {
-    fontSize: 10,
-    fontWeight: "700",
-    color: "white",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  productInfo: {
-    padding: 12,
-  },
-  priceRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  addToCartIcon: {
-    padding: 4,
-  },
-  section: {
-    backgroundColor: "transparent",
-    marginTop: 24,
-    paddingHorizontal: 20,
-  },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
-  },
-  sectionTitle: {
-    paddingBottom: 6,
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#1A1A1A",
-    letterSpacing: -0.5,
   },
   sectionSubtitle: {
     fontSize: 13,
@@ -1132,7 +1338,35 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "transparent",
   },
-
+  productCardSelected: {
+    borderColor: "#00A8E8",
+    shadowColor: "#00A8E8",
+    shadowOpacity: 0.3,
+    elevation: 6,
+  },
+  productImageContainer: {
+    width: "100%",
+    height: 160,
+    position: "relative",
+  },
+  productImage: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#F5F5F5",
+  },
+  imageOverlayGradient: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: "40%",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
+  },
+  checkboxContainer: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+  },
   checkbox: {
     width: 28,
     height: 28,
@@ -1142,6 +1376,30 @@ const styles = StyleSheet.create({
   },
   checkboxSelected: {
     backgroundColor: "white",
+  },
+  stockBadge: {
+    position: "absolute",
+    bottom: 8,
+    left: 8,
+    backgroundColor: "rgba(76, 175, 80, 0.9)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  stockBadgeLimited: {
+    backgroundColor: "rgba(255, 152, 0, 0.9)",
+  },
+  stockText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "white",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  productInfo: {
+    padding: 12,
   },
   categoryBadge: {
     alignSelf: "flex-start",
@@ -1158,6 +1416,13 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 0.8,
   },
+  productName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 12,
+    lineHeight: 18,
+  },
   productFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -1168,6 +1433,11 @@ const styles = StyleSheet.create({
     color: "#999",
     marginBottom: 2,
     fontWeight: "600",
+  },
+  productPrice: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#00A8E8",
   },
   addButton: {
     width: 40,
@@ -1196,5 +1466,208 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: "#00A8E8",
     opacity: 0.2,
+  },
+  uploadOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  uploadCard: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 30,
+    alignItems: "center",
+    width: "85%",
+    maxWidth: 320,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10,
+  },
+  uploadText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginTop: 20,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  uploadSubtext: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  fileInfo: {
+    fontSize: 13,
+    color: "#00A8E8",
+    textAlign: "center",
+    marginTop: 8,
+    fontStyle: "italic",
+  },
+  floatingButtonContainer: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    right: 20,
+    zIndex: 100,
+  },
+  floatingButton: {
+    backgroundColor: "#00A8E8",
+    borderRadius: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    position: "relative",
+  },
+  cartIndicator: {
+    position: "absolute",
+    top: -8,
+    left: -8,
+    backgroundColor: "#E91E63",
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "white",
+  },
+  cartCount: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "white",
+  },
+  buttonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  floatingButtonText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "white",
+    marginHorizontal: 12,
+  },
+  deliveryTime: {
+    position: "absolute",
+    top: -20,
+    fontSize: 12,
+    color: "white",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 40,
+    maxHeight: "90%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#333",
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F9FF",
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+    gap: 12,
+  },
+  modalInfoText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#333",
+    lineHeight: 20,
+  },
+  modalOptions: {
+    gap: 12,
+    marginBottom: 28,
+  },
+  modalOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    backgroundColor: "#FAFAFA",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+  },
+  optionIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#E6F7FF",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  optionTextContainer: {
+    flex: 1,
+  },
+  optionTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginBottom: 4,
+  },
+  optionDescription: {
+    fontSize: 13,
+    color: "#666",
+  },
+  modalRequirements: {
+    backgroundColor: "#F8F9FA",
+    borderRadius: 16,
+    padding: 20,
+  },
+  requirementsTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#333",
+    marginBottom: 12,
+  },
+  requirementsList: {
+    gap: 10,
+  },
+  requirementItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  requirementText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
   },
 });

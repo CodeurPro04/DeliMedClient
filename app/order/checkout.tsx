@@ -49,12 +49,6 @@ const PAYMENT_METHODS = [
     description: "Payez à la livraison" 
   },
   { 
-    id: "card", 
-    name: "Carte bancaire", 
-    icon: "card-outline", 
-    description: "Paiement sécurisé" 
-  },
-  { 
     id: "orange", 
     name: "Orange Money", 
     description: "Paiement via Orange Money",

@@ -314,13 +314,15 @@ export default function CartScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  // Récupérer l'ID de la pharmacie
   const pharmacyId = Array.isArray(params.pharmacyId)
     ? params.pharmacyId[0]
     : params.pharmacyId || "1";
 
   const productIds =
     typeof params.products === "string" ? params.products.split(",") : [];
+
+  // Vérifier si on revient de l'écran d'ordonnance
+  const prescriptionAdded = params.prescriptionAdded === "true";
 
   const initialCart = useMemo(() => {
     return productIds
@@ -335,6 +337,7 @@ export default function CartScreen() {
   const [pharmacy, setPharmacy] = useState(
     pharmaciesData[pharmacyId] || pharmaciesData["1"]
   );
+  const [hasPrescriptionUploaded, setHasPrescriptionUploaded] = useState(false);
 
   // Calculer les totaux
   const subtotal = cartItems.reduce(
@@ -350,6 +353,24 @@ export default function CartScreen() {
     (item) => item.requiresPrescription
   );
 
+  // Gérer le retour depuis l'écran d'ordonnance
+  useEffect(() => {
+    if (prescriptionAdded) {
+      setHasPrescriptionUploaded(true);
+      // Afficher un message de confirmation
+      Alert.alert(
+        "Ordonnance ajoutée !",
+        "Votre ordonnance a été enregistrée. Vous pouvez maintenant finaliser votre commande.",
+        [
+          {
+            text: "Continuer",
+            onPress: () => proceedToCheckout(),
+          },
+        ]
+      );
+    }
+  }, [prescriptionAdded]);
+
   // Mettre à jour la quantité
   const updateQuantity = (id: string, delta: number) => {
     setCartItems((prev) =>
@@ -357,7 +378,6 @@ export default function CartScreen() {
         .map((item) => {
           if (item.id === id) {
             const newQuantity = item.quantity + delta;
-            // Vérifier le stock
             if (newQuantity > item.pharmacyStock) {
               Alert.alert(
                 "Stock limité",
@@ -403,22 +423,29 @@ export default function CartScreen() {
       return;
     }
 
-    if (hasPrescriptionItems) {
+    if (hasPrescriptionItems && !hasPrescriptionUploaded) {
       Alert.alert(
         "Ordonnance requise",
         "Certains produits nécessitent une ordonnance. Souhaitez-vous ajouter une ordonnance maintenant ?",
         [
-          { text: "Plus tard", style: "cancel" },
+          {
+            text: "Continuer sans",
+            style: "cancel",
+            onPress: () => proceedToCheckout(),
+          },
           {
             text: "Ajouter une ordonnance",
             onPress: () => {
-              // Naviguer vers l'écran d'ajout d'ordonnance
-              router.push("/add-prescription");
+              // Passer les informations nécessaires
+              router.push({
+                pathname: "/order/prescription",
+                params: {
+                  returnToCart: "true",
+                  pharmacyId: pharmacy.id,
+                  products: productIds.join(","),
+                },
+              });
             },
-          },
-          {
-            text: "Continuer sans",
-            onPress: () => proceedToCheckout(),
           },
         ]
       );
@@ -444,6 +471,7 @@ export default function CartScreen() {
         subtotal: subtotal.toString(),
         deliveryFee: deliveryFee.toString(),
         total: total.toString(),
+        hasPrescription: hasPrescriptionUploaded.toString(),
       },
     });
   };
@@ -453,12 +481,9 @@ export default function CartScreen() {
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor="#00A8E8" />
-
-        {/* Zone bleue pour l'encoché */}
         <View style={styles.statusBarBackground} />
 
         <SafeAreaView style={styles.safeArea}>
-          {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity
               style={styles.backButton}
@@ -495,12 +520,9 @@ export default function CartScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#00A8E8" />
-
-      {/* Zone bleue pour l'encoché */}
       <View style={styles.statusBarBackground} />
 
       <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -540,7 +562,9 @@ export default function CartScreen() {
                 <View style={styles.detailItem}>
                   <Ionicons name="car-outline" size={14} color="#666" />
                   <Text style={styles.detailText}>
-                    {pharmacy.deliveryFee.toLocaleString()} FCFA
+                    {pharmacy.deliveryFee === 0 
+                      ? "Livraison gratuite" 
+                      : `${pharmacy.deliveryFee.toLocaleString()} FCFA`}
                   </Text>
                 </View>
               </View>
@@ -561,7 +585,6 @@ export default function CartScreen() {
 
           {cartItems.map((item) => (
             <View key={item.id} style={styles.cartItem}>
-              {/* Image produit */}
               <View style={styles.imageWrapper}>
                 <Image
                   source={{ uri: item.image }}
@@ -575,7 +598,6 @@ export default function CartScreen() {
                 )}
               </View>
 
-              {/* Informations produit */}
               <View style={styles.itemInfo}>
                 <Text style={styles.itemName}>{item.name}</Text>
                 <Text style={styles.itemDescription}>{item.description}</Text>
@@ -592,7 +614,6 @@ export default function CartScreen() {
                 </View>
               </View>
 
-              {/* Contrôles quantité */}
               <View style={styles.quantitySection}>
                 <View style={styles.quantityControls}>
                   <TouchableOpacity
@@ -648,7 +669,7 @@ export default function CartScreen() {
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Frais de livraison</Text>
               <Text style={styles.summaryValue}>
-                {deliveryFee.toLocaleString()} FCFA
+                {deliveryFee === 0 ? "Gratuit" : `${deliveryFee.toLocaleString()} FCFA`}
               </Text>
             </View>
 
@@ -672,14 +693,22 @@ export default function CartScreen() {
             </View>
 
             {hasPrescriptionItems && (
-              <View style={styles.prescriptionNotice}>
+              <View style={[
+                styles.prescriptionNotice,
+                hasPrescriptionUploaded && styles.prescriptionNoticeSuccess
+              ]}>
                 <Ionicons
-                  name="document-text-outline"
+                  name={hasPrescriptionUploaded ? "checkmark-circle" : "document-text-outline"}
                   size={16}
-                  color="#00A8E8"
+                  color={hasPrescriptionUploaded ? "#4CAF50" : "#00A8E8"}
                 />
-                <Text style={styles.prescriptionText}>
-                  Ordonnance requise pour certains produits
+                <Text style={[
+                  styles.prescriptionText,
+                  hasPrescriptionUploaded && styles.prescriptionTextSuccess
+                ]}>
+                  {hasPrescriptionUploaded 
+                    ? "Ordonnance ajoutée avec succès" 
+                    : "Ordonnance requise pour certains produits"}
                 </Text>
               </View>
             )}
@@ -721,7 +750,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8F9FA",
   },
-  // Zone bleue pour l'encoché
   statusBarBackground: {
     position: "absolute",
     top: 0,
@@ -1015,11 +1043,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginTop: 16,
   },
+  prescriptionNoticeSuccess: {
+    backgroundColor: "#E8F5E9",
+  },
   prescriptionText: {
     flex: 1,
     fontSize: 12,
     color: "#00A8E8",
     fontWeight: "500",
+  },
+  prescriptionTextSuccess: {
+    color: "#4CAF50",
   },
   footer: {
     position: "absolute",
