@@ -2,14 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import {
-    Dimensions,
-    Image,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -32,7 +32,7 @@ export default function Onboarding1() {
       {/* Illustration */}
       <View style={styles.illustrationContainer}>
         <Image
-          source={require('@/assets/images/logo.jpg')}
+          source={require('@/assets/images/logoo1.png')}
           style={styles.illustration}
           resizeMode="contain"
         />

@@ -41,6 +41,7 @@ interface Banner {
   title: string;
   subtitle: string;
   image: string;
+  buttonText: string;
 }
 
 interface UserLocation {
@@ -54,7 +55,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [userLocation, setUserLocation] = useState<UserLocation>({
     city: "Abidjan",
-    district: "Marcory",
+    district: "Ruelle Eliaka Catherine",
   });
   const [loadingLocation, setLoadingLocation] = useState(true);
   const bannerScrollRef = useRef<ScrollView>(null);
@@ -71,7 +72,6 @@ export default function HomeScreen() {
     try {
       setLoadingLocation(true);
 
-      // Demander les permissions de localisation
       const { status } = await Location.requestForegroundPermissionsAsync();
 
       if (status !== "granted") {
@@ -84,12 +84,10 @@ export default function HomeScreen() {
         return;
       }
 
-      // Obtenir la position actuelle avec haute précision
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
 
-      // Géocodage inverse pour obtenir l'adresse
       const addresses = await Location.reverseGeocodeAsync({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
@@ -98,7 +96,6 @@ export default function HomeScreen() {
       if (addresses && addresses.length > 0) {
         const address = addresses[0];
 
-        // Construire l'adresse de manière intelligente
         const district =
           address.district ||
           address.subregion ||
@@ -130,13 +127,9 @@ export default function HomeScreen() {
     }
   };
 
-  // Fonction de rafraîchissement
   const onRefresh = async () => {
     setRefreshing(true);
-
-    // Recharger la localisation et les données
     await getUserLocation();
-
     setTimeout(() => {
       console.log("Données rafraîchies !");
       setRefreshing(false);
@@ -144,7 +137,6 @@ export default function HomeScreen() {
   };
 
   const handleSeeMorePress = () => {
-    // Animation de press
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 0.95,
@@ -173,6 +165,7 @@ export default function HomeScreen() {
       id: "1",
       title: "Promo -30%",
       subtitle: "Vitamines & Compléments",
+      buttonText: "Voir les offres",
       image:
         "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80",
     },
@@ -180,6 +173,7 @@ export default function HomeScreen() {
       id: "2",
       title: "Nouveauté",
       subtitle: "Soins dermatologiques",
+      buttonText: "Découvrir",
       image:
         "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=800&q=80",
     },
@@ -187,22 +181,9 @@ export default function HomeScreen() {
       id: "3",
       title: "Livraison rapide",
       subtitle: "Médicaments essentiels",
+      buttonText: "Commander",
       image:
         "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800&q=80",
-    },
-    {
-      id: "4",
-      title: "Bien-être",
-      subtitle: "Produits naturels",
-      image:
-        "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=800&q=80",
-    },
-    {
-      id: "5",
-      title: "Santé familiale",
-      subtitle: "Parapharmacie",
-      image:
-        "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=800&q=80",
     },
   ];
 
@@ -211,7 +192,7 @@ export default function HomeScreen() {
     {
       id: "1",
       name: "Pharmacie de la Riviera Palmeraie",
-      address: "Boulevard Mitterrand, Riviera Palmeraie, Cocody, Abidjan",
+      address: "Boulevard Mitterrand, Cocody, Abidjan",
       distance: "2.3 km",
       closingTime: "22:00",
       isOpen: true,
@@ -230,53 +211,8 @@ export default function HomeScreen() {
       image:
         "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80",
     },
-    {
-      id: "3",
-      name: "Pharmacie de Yopougon Niangon",
-      address: "Niangon Sud, Yopougon, Abidjan",
-      distance: "7.6 km",
-      closingTime: "21:00",
-      isOpen: true,
-      deliveryTime: "30-45 min",
-      image:
-        "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&q=80",
-    },
-    {
-      id: "4",
-      name: "Pharmacie d'Angré Château",
-      address: "Angré 8e Tranche, Cocody, Abidjan",
-      distance: "3.1 km",
-      closingTime: "23:00",
-      isOpen: true,
-      deliveryTime: "10-20 min",
-      image:
-        "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=400&q=80",
-    },
-    {
-      id: "5",
-      name: "Pharmacie du Marché de Treichville",
-      address: "Avenue 21, Treichville, Abidjan",
-      distance: "6.9 km",
-      closingTime: "20:00",
-      isOpen: false,
-      deliveryTime: "—",
-      image:
-        "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&q=80",
-    },
-    {
-      id: "6",
-      name: "Pharmacie de Marcory Zone 4",
-      address: "Zone 4C, Marcory, Abidjan",
-      distance: "5.4 km",
-      closingTime: "22:30",
-      isOpen: true,
-      deliveryTime: "15-30 min",
-      image:
-        "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80",
-    },
   ];
 
-  // Filtrer les pharmacies selon la recherche
   const filteredPharmacies = pharmacies.filter(
     (pharmacy) =>
       pharmacy.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -295,8 +231,39 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container} edges={["top"]}>
       <StatusBar barStyle="light-content" backgroundColor="#00A8E8" />
 
-      {/* Header Section */}
-      <View style={styles.header}>
+      {/* Header Section avec gradient */}
+      <LinearGradient
+        colors={["#00A8E8", "#9D8FE8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.header}
+      >
+        {/* Top bar avec logo et notifications */}
+        <View style={styles.topBar}>
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("@/assets/images/nlogo2.png")}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={styles.logoText}>Delymed</Text>
+          </View>
+          <View style={styles.notificationsContainer}>
+            <TouchableOpacity style={styles.notificationBadge}>
+              <Ionicons name="notifications" size={24} color="white" />
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>3</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.notificationBadge}>
+              <Ionicons name="chatbubble-ellipses" size={24} color="white" />
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>1</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Localisation de l'utilisateur */}
         <TouchableOpacity
           style={styles.locationContainer}
@@ -317,12 +284,15 @@ export default function HomeScreen() {
           <Ionicons name="chevron-down" size={20} color="white" />
         </TouchableOpacity>
 
-        <View style={styles.actionBanner}>
+        {/* Action Banner */}
+        <TouchableOpacity style={styles.actionBanner} activeOpacity={0.8}>
           <Text style={styles.actionText}>
-            Besoin d'un médicament ? Trouvez-le facilement ici ↓
+            Besoin d&apos;un médicament ? Trouvez-le facilement ici
           </Text>
-        </View>
+          <Ionicons name="chevron-forward" size={20} color="white" />
+        </TouchableOpacity>
 
+        {/* Search Bar */}
         <SearchBar
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -330,7 +300,7 @@ export default function HomeScreen() {
           showBarcode
           onBarcodeScanned={handleBarcodeScanned}
         />
-      </View>
+      </LinearGradient>
 
       <ScrollView
         style={styles.scrollView}
@@ -345,51 +315,7 @@ export default function HomeScreen() {
           />
         }
       >
-        <View style={styles.navContainer}>
-          {/* Pharmacies */}
-          <TouchableOpacity style={styles.navItem} onPress={() => router.push("/pharmacies")}>
-            <LinearGradient
-              colors={["#5DC8F3", "#E8A0D8"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={styles.navIcon}
-            >
-              <Ionicons name="medkit" size={36} color="white" />
-            </LinearGradient>
-            <Text style={styles.navLabel}>Pharmacies</Text>
-          </TouchableOpacity>
-
-          {/* Carte */}
-          <TouchableOpacity
-            style={styles.navItem}
-            onPress={() => router.push("/map")}
-          >
-            <LinearGradient
-              colors={["#5DC8F3", "#E8A0D8"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={styles.navIcon}
-            >
-              <Ionicons name="map" size={36} color="white" />
-            </LinearGradient>
-            <Text style={styles.navLabel}>Carte</Text>
-          </TouchableOpacity>
-
-          {/* Service */}
-          <TouchableOpacity style={styles.navItem}>
-            <LinearGradient
-              colors={["#9D8FE8", "#E8A0D8"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={styles.navIcon}
-            >
-              <Ionicons name="call" size={36} color="white" />
-            </LinearGradient>
-            <Text style={styles.navLabel}>Service</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Banner Carousel avec images */}
+        {/* Banner Carousel */}
         <View style={styles.carouselContainer}>
           <ScrollView
             ref={bannerScrollRef}
@@ -417,6 +343,12 @@ export default function HomeScreen() {
                   <View style={styles.bannerContent}>
                     <Text style={styles.bannerTitle}>{banner.title}</Text>
                     <Text style={styles.bannerSubtitle}>{banner.subtitle}</Text>
+                    {/* Bouton d'action de la bannière
+                    <TouchableOpacity style={styles.bannerButton}>
+                      <Text style={styles.bannerButtonText}>
+                        {banner.buttonText}
+                      </Text>
+                    </TouchableOpacity>  */}
                   </View>
                 </View>
               </TouchableOpacity>
